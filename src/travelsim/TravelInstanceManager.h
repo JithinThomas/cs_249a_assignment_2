@@ -2,6 +2,7 @@
 #define TRAVELSIM_TRAVELINSTANCEMANAGER_H
 
 #include "InstanceManager.h"
+#include "TravelManager.h"
 
 #include <sstream>
 
@@ -77,7 +78,7 @@ protected:
         string attribute(const string& name) {
             if (name == "source") {
                 // TODO: Finish the implementation.
-                return;
+                return "";
             }
 
             // TODO: Finish the implementation.

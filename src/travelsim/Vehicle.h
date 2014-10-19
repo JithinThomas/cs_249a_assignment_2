@@ -34,6 +34,12 @@ public:
 		return new Vehicle(name);
 	}
 
+protected:
+
+	typedef std::list<Notifiee*> NotifieeList;
+
+public:
+
 	VehicleCapacity capacity() const {
 		return capacity_;
 	}
@@ -58,11 +64,21 @@ public:
 		cost_ = cost;
 	}
 
+	NotifieeList& notifiees() {
+        return notifiees_;
+    }
+
+	Vehicle(const Vehicle&) = delete;
+
+	void operator =(const Vehicle&) = delete;
+
 protected:
 
 	static const VehicleCapacity defaulCapacity = 0;
 	static const VehicleSpeed defaulSpeed = 0;
 	static const VehicleCost defaulCost = 0;
+
+	NotifieeList notifiees_;
 
 	Vehicle(const string& name) :
 		NamedInterface(name),

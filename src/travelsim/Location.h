@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "Segment.h"
+
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
 using fwk::NotifierLib::post;
@@ -31,11 +33,19 @@ public:
 		virtual void onSegmentDel(const Ptr<Segment>& segment) { };
 	};
 
+protected:
+
+	typedef vector< Ptr<Segment> > SegmentVector;
+	typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
+	typedef std::list<Notifiee*> NotifieeList;
+
+public:
+
 	static Ptr<Location> instanceNew(const string& name) {
 		return new Location(name);
 	}
 
-	Ptr<Segment> segment(const SegmentId id) const {
+	Ptr<Segment> segment(const U32 id) const {
 		if (id < segments_.size()) {
 			return segments_[id];
 		}
@@ -57,7 +67,17 @@ public:
 		}
 	}
 
+	NotifieeList& notifiees() {
+        return notifiees_;
+    }
+
+	Location(const Location&) = delete;
+
+	void operator =(const Location&) = delete;
+
 protected:
+
+	NotifieeList notifiees_;
 
 	explicit Location(const string& name) :
 		NamedInterface(name),
@@ -71,9 +91,7 @@ protected:
 	}
 
 private:
-	typedef vector< Ptr<Segment> > SegmentVector;
-	typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
-
+	
 	/* Segments for which the Location object is the 'source' */
 	SegmentVector segments_;
 };

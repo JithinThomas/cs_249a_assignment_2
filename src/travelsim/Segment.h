@@ -5,7 +5,11 @@
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
 using fwk::NotifierLib::post;
+using fwk::Ordinal;
 using fwk::Ptr;
+
+class Location;
+class Segment;
 
 typedef Ordinal< Segment, unsigned int > SegmentLength;
 
@@ -35,6 +39,11 @@ public:
 		return new Segment(name, source, destination, length);
 	}
 
+protected:
+	typedef std::list<Notifiee*> NotifieeList;
+
+public:
+
 	Ptr<Location> source() const {
 		return source_;
 	}
@@ -59,7 +68,17 @@ public:
 		length_ = length;
 	}
 
+	NotifieeList& notifiees() {
+        return notifiees_;
+    }
+
+	Segment(const Segment&) = delete;
+
+	void operator =(const Segment&) = delete;
+
 protected:
+
+	NotifieeList notifiees_;
 
 	Segment(const string& name, 
 			const Ptr<Location>& source, 
@@ -68,7 +87,7 @@ protected:
 		NamedInterface(name),
 		source_(source),
 		destination_(destination),
-		length(length_)
+		length_(length)
 	{
 		// Nothing to do
 	}
