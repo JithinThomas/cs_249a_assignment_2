@@ -104,7 +104,7 @@ protected:
 	Airplane(const string& name) :
 		Vehicle(name)
 	{
-
+		// Nothing to do
 	}
 
 	Airplane(const string& name,
@@ -128,7 +128,7 @@ protected:
 	Car(const string& name) :
 		Vehicle(name)
 	{
-
+		// Nothing to do
 	}
 
 	Car(const string& name,
