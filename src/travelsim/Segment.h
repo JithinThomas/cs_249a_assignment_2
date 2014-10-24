@@ -75,6 +75,7 @@ public:
 	Segment(const Segment&) = delete;
 
 	void operator =(const Segment&) = delete;
+	void operator ==(const Segment&) = delete;
 
 protected:
 

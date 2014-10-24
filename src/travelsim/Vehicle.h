@@ -71,6 +71,7 @@ public:
 	Vehicle(const Vehicle&) = delete;
 
 	void operator =(const Vehicle&) = delete;
+	void operator ==(const Vehicle&) = delete;
 
 protected:
 

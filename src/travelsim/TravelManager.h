@@ -11,6 +11,8 @@ using fwk::NamedInterface;
 using fwk::NotifierLib::post;
 using fwk::Ptr;
 
+using std::cout;
+using std::endl;
 using std::unordered_map;
 
 //=======================================================
@@ -28,12 +30,17 @@ class TravelManager : public NamedInterface {
 public:
 
 	class Notifiee : public BaseNotifiee<TravelManager> {
+	public:
+
 		void notifierIs(const Ptr<TravelManager>& travelManager) {
 			connect(travelManager, this);
 		}
 
-		/* Notification that a new Location has been instantiated */
-		virtual void onLocationNew(const Ptr<Location>& location) { }
+		/* Notification that a new Residence has been instantiated */
+		virtual void onResidenceNew(const Ptr<Residence>& residence) { }
+
+		/* Notification that a new Airport has been instantiated */
+		virtual void onAirportNew(const Ptr<Airport>& airport) { }
 
 		/* Notification that a new Flight has been instantiated */
 		virtual void onFlightNew(const Ptr<Flight>& flight) { }
@@ -85,15 +92,30 @@ public:
 		return null;
 	}
 
-	Ptr<Location> locationNew(const string& name) {
+	Ptr<Airport> airportNew(const string& name) {
 		if (isNameInUse(name)) {
 			throw fwk::NameInUseException(name);
 		}
 
-		const auto location = Location::instanceNew(name);
-		locationMap_.insert(LocationMap::value_type(name, location));
+		const auto airport = Airport::instanceNew(name);
+		locationMap_.insert(LocationMap::value_type(name, airport));
 
-		return location;
+		post(this, &Notifiee::onAirportNew, airport);
+
+		return airport;
+	}
+
+	Ptr<Residence> residenceNew(const string& name) {
+		if (isNameInUse(name)) {
+			throw fwk::NameInUseException(name);
+		}
+
+		const auto residence = Residence::instanceNew(name);
+		locationMap_.insert(LocationMap::value_type(name, residence));
+
+		post(this, &Notifiee::onResidenceNew, residence);
+
+		return residence;
 	}
 
 	Ptr<Flight> flightNew(const string& name,
@@ -106,6 +128,8 @@ public:
 
 		const auto flight = Flight::instanceNew(name, source, destination, length);
 		segmentMap_.insert(SegmentMap::value_type(name, flight));
+
+		post(this, &Notifiee::onFlightNew, flight);
 
 		return flight;
 	}
@@ -121,6 +145,8 @@ public:
 		const auto road = Road::instanceNew(name, source, destination, length);
 		segmentMap_.insert(SegmentMap::value_type(name, road));
 
+		post(this, &Notifiee::onRoadNew, road);
+
 		return road;
 	}
 
@@ -131,6 +157,8 @@ public:
 
 		const auto airplane = Airplane::instanceNew(name);
 		vehicleMap_.insert(VehicleMap::value_type(name, airplane));
+
+		post(this, &Notifiee::onAirplaneNew, airplane);
 
 		return airplane;
 	}
@@ -143,6 +171,8 @@ public:
 		const auto car = Car::instanceNew(name);
 		vehicleMap_.insert(VehicleMap::value_type(name, car));
 
+		post(this, &Notifiee::onCarNew, car);
+
 		return car;
 	}
 
@@ -153,6 +183,7 @@ public:
 	TravelManager(const TravelManager&) = delete;
 
 	void operator =(const TravelManager&) = delete;
+	void operator ==(const TravelManager&) = delete;
 
 protected:
 

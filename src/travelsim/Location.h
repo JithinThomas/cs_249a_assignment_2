@@ -74,6 +74,7 @@ public:
 	Location(const Location&) = delete;
 
 	void operator =(const Location&) = delete;
+	void operator ==(const Location&) = delete;
 
 protected:
 
