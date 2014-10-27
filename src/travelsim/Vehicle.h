@@ -4,8 +4,20 @@
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
+using fwk::Ordinal;
 using fwk::NotifierLib::post;
 using fwk::Ptr;
+
+/*
+class VehicleCap {};
+typedef Ordinal<VehicleCap, unsigned int> VehicleCapacity;
+
+class VehicleSp {};
+typedef Ordinal<VehicleSp, unsigned int> VehicleSpeed;
+
+class VehicleCo {};
+typedef Ordinal<VehicleCo, unsigned int> VehicleCost;
+*/
 
 typedef unsigned int VehicleCapacity;
 typedef unsigned int VehicleSpeed;

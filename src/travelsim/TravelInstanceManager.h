@@ -6,6 +6,7 @@
 #include "TravelManagerTracker.h"
 #include "Conn.h"
 
+#include <numeric>
 #include <sstream>
 
 using std::cerr;
@@ -122,20 +123,20 @@ protected:
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            if (name == "source") {
-                if (segment_ != null) {
-                    segment_->sourceIs(travelManager_->location(value));
-                }
-            } else if (name == "destination") {
-                if (segment_ != null) {
-                    segment_->destinationIs(travelManager_->location(value));
-                }
-            } else if (name == "length") {
-                if (segment_ != null) {
-                    auto length = SegmentLength(stoi(value));
-                    segment_->lengthIs(length);
-                }
+            if (segment_ == null) {
+                return;
             }
+
+            if (name == "source") {
+                segment_->sourceIs(travelManager_->location(value));
+            } else if (name == "destination") {
+                segment_->destinationIs(travelManager_->location(value));
+            } else if (name == "length") {
+                auto length = SegmentLength(stoi(value));
+                segment_->lengthIs(length);
+            }
+
+            cerr << "[WARNING]: A Segment does not have an attribute named '" << name << "'" << endl;
         }
 
     protected:
@@ -169,24 +170,40 @@ protected:
 
         _noinline
         string attribute(const string& name) {
-            if (name == "capacity") {
-                // TODO: Finish the implementation.
+            if (vehicle_ == null) {
                 return "";
             }
 
-            // TODO: Finish the implementation.
+            if (name == "capacity") {
+                return to_string(vehicle_->capacity());
+            } else if (name == "speed") {
+                return to_string(vehicle_->speed());
+            } else if (name == "cost") {
+                return to_string(vehicle_->cost());
+            }
 
+            cerr << "[WARNING]: A Vehicle does not have an attribute named '" << name << "'" << endl;
             return "";
         }
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            if (name == "capacity") {
-                // TODO: Finish the implementation.
+            if (vehicle_ == null) {
                 return;
             }
 
-            // TODO: Finish the implementation.
+            if (name == "capacity") {
+                vehicle_->capacityIs(stoi(value));
+                return;
+            } else if (name == "speed") {
+                vehicle_->speedIs(stoi(value));
+                return;
+            } else if (name == "cost") {
+                vehicle_->costIs(stoi(value));
+                return;
+            }
+
+            cerr << "[WARNING]: A Vehicle does not have an attribute named '" << name << "'" << endl;
         }
 
     protected:
@@ -232,9 +249,21 @@ protected:
             string locName;
             ss >> locName;
 
-            // TODO: Finish the implementation.
+            unsigned int maxLength;
 
-            return "";
+            ss >> cmd >> maxLength;
+            if (cmd != "distance") {
+                return "";
+            }
+
+            auto location = travelManager_->location(locName);
+            auto paths = conn_->paths(location, SegmentLength(maxLength));
+            string allPathsStr = "";
+            for (auto p : paths) {
+                allPathsStr += p.value() + "\n";
+            }
+
+            return allPathsStr;
         }
 
         _noinline
@@ -263,7 +292,6 @@ protected:
         friend class TravelInstanceManager;
 
         Ptr<Conn> conn_;
-        // TODO: Finish the implementation.
 
     };
 
@@ -272,7 +300,21 @@ protected:
 
         _noinline
         string attribute(const string& name) {
+            if (stats_ == null) {
+                return "";
+            }
 
+            if (name == "Residence") {
+                return to_string(stats_->residenceCount());
+            } else if (name == "Airport") {
+                return to_string(stats_->airportCount());
+            } else if (name == "Flight") {
+                return to_string(stats_->flightCount());
+            } else if (name == "Road") {
+                return to_string(stats_->roadCount());
+            }
+
+            cerr << "[WARNING]: Stats does not support an attribute named '" << name << "'" << endl;
             return "";
         }
 
