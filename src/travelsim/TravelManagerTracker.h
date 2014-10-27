@@ -52,7 +52,7 @@ public:
 	}
 
 	void onAirplaneNew(const Ptr<Airplane>& airplane) {
-		airportCount_++;
+		airplaneCount_++;
 	}
 
 	void onCarNew(const Ptr<Car>& car) {

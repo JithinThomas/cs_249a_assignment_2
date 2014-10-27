@@ -129,11 +129,14 @@ protected:
 
             if (name == "source") {
                 segment_->sourceIs(travelManager_->location(value));
+                return;
             } else if (name == "destination") {
                 segment_->destinationIs(travelManager_->location(value));
+                return;
             } else if (name == "length") {
                 auto length = SegmentLength(stoi(value));
                 segment_->lengthIs(length);
+                return;
             }
 
             cerr << "[WARNING]: A Segment does not have an attribute named '" << name << "'" << endl;
@@ -363,11 +366,13 @@ protected:
         auto travelManagerTracker = TravelManagerTracker::instanceNew("stats");
         travelManagerTracker->notifierIs(travelManager_);
         statsInstance_->statsIs(travelManagerTracker);
+        statsInstance_->travelManagerIs(travelManager_);
 
         connInstance_ = new ConnInstance("conn");
         auto conn = Conn::instanceNew("conn");
         conn->travelManagerIs(travelManager_);
         connInstance_->connIs(conn);
+        connInstance_->travelManagerIs(travelManager_);
     }
 
     /**
@@ -378,22 +383,22 @@ protected:
     // TODO: Finish the implementation.
     Ptr<Instance> createInstance(const string& name, const string& spec) {
         if (spec == "Residence") {
-            auto residence = Residence::instanceNew(name);
+            auto residence = travelManager_->residenceNew(name);
             return createLocationInstance(name, residence);
         } else if (spec == "Airport") {
-            auto airport = Airport::instanceNew(name);
+            auto airport = travelManager_->airportNew(name);
             return createLocationInstance(name, airport);
         } else if (spec == "Flight") {
-            auto flight = Flight::instanceNew(name);
+            auto flight = travelManager_->flightNew(name);
             return createSegmentInstance(name, flight);
         } else if (spec == "Road") {
-            auto road = Road::instanceNew(name);
+            auto road = travelManager_->roadNew(name);
             return createSegmentInstance(name, road);
         }  else if (spec == "Airplane") {
-            auto airplane = Airplane::instanceNew(name);
+            auto airplane = travelManager_->airplaneNew(name);
             return createVehicleInstance(name, airplane);
         }  else if (spec == "Car") {
-            auto car = Car::instanceNew(name);
+            auto car = travelManager_->carNew(name);
             return createVehicleInstance(name, car);
         }  else if (spec == "Conn") {
             return connInstance_;

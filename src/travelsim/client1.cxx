@@ -52,6 +52,11 @@ int main(const int argc, const char* const argv[]) {
     cout << "carSeg1.source: ";
     cout << manager->instance("carSeg1")->attribute("source") << endl;
 
+    cout << "Stats:" << endl;
+    cout << "# Residences: " << stats->attribute("Residence") << endl;
+    cout << "# Airports: " << stats->attribute("Airport") << endl;
+    cout << "# Road segments: " << stats->attribute("Road") << endl;
+    cout << "# Flight segments: " << stats->attribute("Flight") << endl;
 
     const auto conn = manager->instanceNew("myConn", "Conn");
 
@@ -61,11 +66,6 @@ int main(const int argc, const char* const argv[]) {
     cout << conn->attribute(query1) << endl;
     cout << "**** " << query2 << " ****" << endl;
     cout << conn->attribute(query2) << endl;
-
-    cout << "Stats:" << endl;
-    cout << "# Residences: " << stats->attribute("Residence") << endl;
-    cout << "# Airports: " << stats->attribute("Airport") << endl;
-    cout << "# Road segments: " << stats->attribute("Road") << endl;
 
     return 0;
 }
