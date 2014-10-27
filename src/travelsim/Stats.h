@@ -27,9 +27,11 @@ public:
 		return new Stats(name, travelManager);
 	}
 
+	/*
 	TravelManagerTracker tracker() const {
 		return travelManagerTracker_;
 	}
+	*/
 
 	Stats(const Stats&) = delete;
 
@@ -42,12 +44,12 @@ protected:
 		NamedInterface(name)
 	{
 		travelManager_ = travelManager;
-		travelManagerTracker_.notifierIs(travelManager_);
+		//travelManagerTracker_.notifierIs(travelManager_);
 	}
 
 private:
 	Ptr<TravelManager> travelManager_;
-	TravelManagerTracker travelManagerTracker_;
+	//TravelManagerTracker travelManagerTracker_;
 };
 
 #endif

@@ -118,32 +118,42 @@ public:
 		return residence;
 	}
 
+	/*
 	Ptr<Flight> flightNew(const string& name,
 						  const Ptr<Location>& source, 
 						  const Ptr<Location>& destination,
 						  const SegmentLength& length) {
+  	*/
+  	Ptr<Flight> flightNew(const string& name) {
 		if (isNameInUse(name)) {
 			throw fwk::NameInUseException(name);
 		}
 
-		const auto flight = Flight::instanceNew(name, source, destination, length);
+		//const auto flight = Flight::instanceNew(name, source, destination, length);
+		const auto flight = Flight::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, flight));
+		//source->segmentIs(flight);
 
 		post(this, &Notifiee::onFlightNew, flight);
 
 		return flight;
 	}
 
+	/*
 	Ptr<Road> roadNew(const string& name,
 					  const Ptr<Location>& source, 
 					  const Ptr<Location>& destination,
 					  const SegmentLength& length) {
+  	*/
+  	Ptr<Road> roadNew(const string& name) {
 		if (isNameInUse(name)) {
 			throw fwk::NameInUseException(name);
 		}
 
-		const auto road = Road::instanceNew(name, source, destination, length);
+		//const auto road = Road::instanceNew(name, source, destination, length);
+		const auto road = Road::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, road));
+		//source->segmentIs(road);
 
 		post(this, &Notifiee::onRoadNew, road);
 

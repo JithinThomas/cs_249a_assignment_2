@@ -36,6 +36,7 @@ public:
 protected:
 
 	typedef vector< Ptr<Segment> > SegmentVector;
+	typedef SegmentVector::const_iterator const_iterator;
 	typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
 	typedef std::list<Notifiee*> NotifieeList;
 
@@ -53,9 +54,20 @@ public:
 		return null;
 	}
 
+	const_iterator segmentIter() const {
+		return segments_.cbegin();
+	}
+
+	const_iterator segmentIterEnd() const {
+		return segments_.cend();
+	}
+
+	// TODO: Is it correct to expose a collection attribute? Or should we just have iter and iterEnd attributes?
+	/*
 	const SegmentVector& segments() const {
 		return segments_;
 	}
+	*/
 
 	unsigned int segmentCount() const {
 		return segments_.size();

@@ -1,8 +1,15 @@
 
-#include <TravelManager.h>
+#ifndef TRAVEL_MANAGER_TRACKER_H
+#define TRAVEL_MANAGER_TRACKER_H
+
+#include "TravelManager.h"
 
 class TravelManagerTracker : public TravelManager::Notifiee {
 public:
+
+	static Ptr<TravelManagerTracker> instanceNew(const string& name) {
+		return new TravelManagerTracker(name);
+	}
 
 	unsigned int residenceCount() const {
 		return residenceCount_;
@@ -52,11 +59,27 @@ public:
 		carCount_++;
 	}
 
+	const string& name() const {
+		return name_;
+	}
+
+protected:
+
+	explicit TravelManagerTracker(const string& name) :
+		name_(name)
+	{
+
+	}
+
 private:
-	unsigned int residenceCount_;
-	unsigned int airportCount_;
-	unsigned int flightCount_;
-	unsigned int roadCount_;
 	unsigned int airplaneCount_;
+	unsigned int airportCount_;
 	unsigned int carCount_;
+	unsigned int flightCount_;
+	unsigned int residenceCount_;
+	unsigned int roadCount_;
+
+	string name_;
 };
+
+#endif

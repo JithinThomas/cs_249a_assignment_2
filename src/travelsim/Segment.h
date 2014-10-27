@@ -32,11 +32,8 @@ public:
 		virtual void onLength() { }
 	};
 
-	static Ptr<Segment> instanceNew(const string& name, 
-									const Ptr<Location>& source, 
-									const Ptr<Location>& destination,
-									const SegmentLength& length) {
-		return new Segment(name, source, destination, length);
+	static Ptr<Segment> instanceNew(const string& name) {
+		return new Segment(name);
 	}
 
 protected:
@@ -81,21 +78,18 @@ protected:
 
 	NotifieeList notifiees_;
 
-	Segment(const string& name, 
-			const Ptr<Location>& source, 
-			const Ptr<Location>& destination,
-			const SegmentLength& length) :
+	explicit Segment(const string& name) :
 		NamedInterface(name),
-		source_(source),
-		destination_(destination),
-		length_(length)
+		length_(0)
 	{
-		// Nothing to do
+		source_ = null;
+		destination_ = null;
 	}
 
 	~Segment() {}
 
 private:
+
 	Ptr<Location> source_;
 	Ptr<Location> destination_;
 	SegmentLength length_;
@@ -103,40 +97,33 @@ private:
 
 class Flight : public Segment {
 public:
-	static Ptr<Flight> instanceNew(	const string& name, 
-									const Ptr<Location>& source, 
-									const Ptr<Location>& destination,
-									const SegmentLength& length) {
-		return new Flight(name, source, destination, length);
+
+	static Ptr<Flight> instanceNew(const string& name) {
+		return new Flight(name);
 	}
 
 protected:
 
-	Flight(const string& name, 
-			const Ptr<Location>& source, 
-			const Ptr<Location>& destination,
-			const SegmentLength& length) :
-		Segment(name, source, destination, length)
+	Flight(const string& name) :
+		Segment(name)
 	{
 		// Nothing to do
 	}
+
+	~Flight() { }
 };
 
 class Road : public Segment {
 public:
-	static Ptr<Road> instanceNew(	const string& name, 
-									const Ptr<Location>& source, 
-									const Ptr<Location>& destination,
-									const SegmentLength& length) {
-		return new Road(name, source, destination, length);
+
+	static Ptr<Road> instanceNew(const string& name) {
+		return new Road(name);
 	}
 
 protected:
-	Road(const string& name, 
-			const Ptr<Location>& source, 
-			const Ptr<Location>& destination,
-			const SegmentLength& length) :
-		Segment(name, source, destination, length)
+
+	Road(const string& name) :
+		Segment(name)
 	{
 		// Nothing to do
 	}
