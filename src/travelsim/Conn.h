@@ -30,14 +30,6 @@ public:
 
 	void segmentIs(const Ptr<Segment> segment) {
 		segments_.push_back(segment);
-		/*
-		if (segments_.size() == 1) {
-			start_ = segment->source();
-		}
-
-		end_ = segment->destination();
-		*/
-
 		length_ = length_ + segment->length();
 	}
 
@@ -48,16 +40,6 @@ public:
 	SegmentLength length() const {
 		return length_;
 	}
-
-	/*
-	Ptr<Location> start() const {
-		return start_;
-	}
-
-	Ptr<Location> end() const {
-		return end_;
-	}
-	*/
 
 	string toString() const {
 		string str = "";
@@ -85,8 +67,6 @@ protected:
 	Path(const Ptr<Path>& p) :
 		segments_(p->segments()),
 		length_(p->length())
-		//start_(p->start()),
-		//end_(p->end())
 	{
 		// Nothing else to do
 	}
@@ -95,8 +75,6 @@ private:
 
 	vector< Ptr<Segment> > segments_;
 	SegmentLength length_;
-	//Ptr<Location> start_;
-	//Ptr<Location> end_;
 };
 
 class Conn : public NamedInterface {
