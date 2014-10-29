@@ -12,8 +12,92 @@ using fwk::Nominal;
 using fwk::NotifierLib::post;
 using fwk::Ordinal;
 using fwk::Ptr;
+using fwk::PtrInterface;
 
 using std::set;
+using std::to_string;
+
+class Path : public PtrInterface {
+public:
+
+	static Ptr<Path> instanceNew() {
+		return new Path();
+	}
+
+	static Ptr<Path> instanceNew(const Ptr<Path>& p) {
+		return new Path(p);
+	}
+
+	void segmentIs(const Ptr<Segment> segment) {
+		segments_.push_back(segment);
+		/*
+		if (segments_.size() == 1) {
+			start_ = segment->source();
+		}
+
+		end_ = segment->destination();
+		*/
+
+		length_ = length_ + segment->length();
+	}
+
+	vector< Ptr<Segment> > segments() const {
+		return segments_;
+	}
+
+	SegmentLength length() const {
+		return length_;
+	}
+
+	/*
+	Ptr<Location> start() const {
+		return start_;
+	}
+
+	Ptr<Location> end() const {
+		return end_;
+	}
+	*/
+
+	string toString() const {
+		string str = "";
+		auto segmentCount = segments_.size();
+		for (auto i = 0; i < segmentCount; i++) {
+			auto seg = segments_[i];
+			str += seg->source()->name() + "(" + seg->name() + ":" + to_string(seg->length().value()) + ") ";
+		}
+
+		if (segmentCount > 0) {
+			str += segments_[segmentCount - 1]->destination()->name();
+		}
+
+		return str;
+	}
+
+protected:
+
+	Path():
+		length_(0)
+	{
+		// Nothing else to do
+	}
+
+	Path(const Ptr<Path>& p) :
+		segments_(p->segments()),
+		length_(p->length())
+		//start_(p->start()),
+		//end_(p->end())
+	{
+		// Nothing else to do
+	}
+
+private:
+
+	vector< Ptr<Segment> > segments_;
+	SegmentLength length_;
+	//Ptr<Location> start_;
+	//Ptr<Location> end_;
+};
 
 class Conn : public NamedInterface {
 public:
@@ -24,8 +108,7 @@ public:
 
 protected:
 
-	typedef Nominal<Conn, string> Path;
-	typedef vector<Path> PathVector;
+	typedef vector< Ptr<Path> > PathVector;
 
 public:
 
@@ -38,8 +121,10 @@ public:
 	}
 
 	const PathVector paths(const Ptr<Location>& location, const SegmentLength& maxLength) const {
-		set<Ptr<Location>> locationsVisited;
-		return getPathsFromLoc(location, 0, maxLength, locationsVisited);
+		set<string> locationsVisited;
+		locationsVisited.insert(location->name());
+
+		return getPathsFromLoc(location, Path::instanceNew(), maxLength, locationsVisited);
 	}
 
 	Conn(const Conn&) = delete;
@@ -59,29 +144,34 @@ protected:
 
 private:
 
-	PathVector getPathsFromLoc(const Ptr<Location>& location, 
-							   const SegmentLength& lengthFromStartToLoc,
+	PathVector getPathsFromLoc(const Ptr<Location>& location,
+							   const Ptr<Path>& pathFromStartLocation,
 							   const SegmentLength& maxLength, 
-							   set<Ptr<Location>> locationsVisited
+							   set<string> locationsVisited
 							  ) const {
-		PathVector paths;
+		PathVector validPaths;
+
 		for (auto it = location->segmentIter(); it != location->segmentIterEnd(); it++) {
 			auto segment = *it;
-			SegmentLength totalLengthOfPath = lengthFromStartToLoc + segment->length();
+			SegmentLength totalLengthOfPath = pathFromStartLocation->length() + segment->length();
 			auto destination = segment->destination();
 
-			if ((totalLengthOfPath <= maxLength) && (locationsVisited.find(destination) == locationsVisited.end())) {
-				paths.push_back(location->name() + "(" + segment->name() + ":" +  + ")");
+			if ((totalLengthOfPath <= maxLength) && (locationsVisited.find(destination->name()) == locationsVisited.end())) {
+				auto p = Path::instanceNew(pathFromStartLocation);
+				p->segmentIs(segment);
+				validPaths.push_back(p);
 
-				locationsVisited.insert(destination);
-				auto otherPaths = getPathsFromLoc(destination, totalLengthOfPath, maxLength, locationsVisited);
-				locationsVisited.erase(destination);
+				locationsVisited.insert(destination->name());
+				auto otherPaths = getPathsFromLoc(destination, p, maxLength, locationsVisited);
+				locationsVisited.erase(destination->name());
 
-				paths.insert(paths.end(), otherPaths.begin(), otherPaths.end());
+				for (auto p : otherPaths) {
+					validPaths.push_back(p);
+				}
 			}
 		}
 
-		return paths;
+		return validPaths;
 	}
 
 	Ptr<TravelManager> travelManager_;

@@ -263,7 +263,8 @@ protected:
             auto paths = conn_->paths(location, SegmentLength(maxLength));
             string allPathsStr = "";
             for (auto p : paths) {
-                allPathsStr += p.value() + "\n";
+                //allPathsStr += p.value() + "\n";
+                allPathsStr += p->toString() + "\n";
             }
 
             return allPathsStr;
@@ -360,6 +361,7 @@ protected:
      */
     void initialize() {
         // TODO: Finish the implementation.
+        // TODO: Ensure that there is no other entity that has the name 'stats' and 'conn'
         travelManager_ = TravelManager::instanceNew("manager");
 
         statsInstance_ = new StatsInstance("stats");

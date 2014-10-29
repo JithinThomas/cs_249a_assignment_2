@@ -62,13 +62,6 @@ public:
 		return segments_.cend();
 	}
 
-	// TODO: Is it correct to expose a collection attribute? Or should we just have iter and iterEnd attributes?
-	/*
-	const SegmentVector& segments() const {
-		return segments_;
-	}
-	*/
-
 	unsigned int segmentCount() const {
 		return segments_.size();
 	}
@@ -76,7 +69,22 @@ public:
 	void segmentIs(const Ptr<Segment> segment) {
 		if (find (segments_.begin(), segments_.end(), segment) == segments_.end()) {
 			segments_.push_back(segment); 
+			post(this, &Notifiee::onSegmentNew, segment);
 		}
+	}
+
+	Ptr<Segment> segmentDel(const Ptr<Segment> segment) {
+		auto it = find( segments_.begin(), segments_.end(), segment);
+		if (it == segments_.end()) {
+			return null;
+		}
+
+		auto seg = *it;
+		segments_.erase(it);
+
+		post(this, &Notifiee::onSegmentDel, seg);
+
+		return seg;
 	}
 
 	NotifieeList& notifiees() {

@@ -26,6 +26,39 @@ bool isKeyPresent(unordered_map<K,V> map, K key) {
 
 //=======================================================
 
+//=======================================================
+// SegmentTracker class
+//=======================================================
+
+class TravelManager;
+class SegmentTracker : public Segment::Notifiee {
+public:
+
+	static Ptr<SegmentTracker> instanceNew() {
+		return new SegmentTracker();
+	}
+
+	virtual void onSource(const Ptr<Location>& prevSource) { 
+		if (prevSource != null) {
+			cout << prevSource->name() << endl;
+			prevSource->segmentDel(notifier());
+		}
+
+		auto currSource = notifier()->source();
+		currSource->segmentIs(notifier());
+	}
+
+private:
+
+	Ptr<TravelManager> travelManager_;
+};
+
+//=======================================================
+
+//=======================================================
+// TravelManager class
+//=======================================================
+
 class TravelManager : public NamedInterface {
 public:
 
@@ -118,42 +151,34 @@ public:
 		return residence;
 	}
 
-	/*
-	Ptr<Flight> flightNew(const string& name,
-						  const Ptr<Location>& source, 
-						  const Ptr<Location>& destination,
-						  const SegmentLength& length) {
-  	*/
   	Ptr<Flight> flightNew(const string& name) {
 		if (isNameInUse(name)) {
 			throw fwk::NameInUseException(name);
 		}
 
-		//const auto flight = Flight::instanceNew(name, source, destination, length);
 		const auto flight = Flight::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, flight));
-		//source->segmentIs(flight);
+		
+		const auto segmentTracker = SegmentTracker::instanceNew();
+		segmentTracker->notifierIs(flight);
+		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(name, segmentTracker));
 
 		post(this, &Notifiee::onFlightNew, flight);
 
 		return flight;
 	}
 
-	/*
-	Ptr<Road> roadNew(const string& name,
-					  const Ptr<Location>& source, 
-					  const Ptr<Location>& destination,
-					  const SegmentLength& length) {
-  	*/
   	Ptr<Road> roadNew(const string& name) {
 		if (isNameInUse(name)) {
 			throw fwk::NameInUseException(name);
 		}
 
-		//const auto road = Road::instanceNew(name, source, destination, length);
 		const auto road = Road::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, road));
-		//source->segmentIs(road);
+
+		const auto segmentTracker = SegmentTracker::instanceNew();
+		segmentTracker->notifierIs(road);
+		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(name, segmentTracker));
 
 		post(this, &Notifiee::onRoadNew, road);
 
@@ -199,6 +224,7 @@ protected:
 
 	typedef unordered_map< string, Ptr<Location> > LocationMap;
 	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
+	typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
 	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
 
 	NotifieeList notifiees_;
@@ -219,6 +245,7 @@ private:
 
 	LocationMap locationMap_;
 	SegmentMap segmentMap_;
+	SegmentTrackerMap segmentTrackerMap_;
 	VehicleMap vehicleMap_;
 };
 

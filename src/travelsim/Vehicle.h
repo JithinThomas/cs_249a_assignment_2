@@ -65,15 +65,24 @@ public:
 	}
 
 	void capacityIs(const VehicleCapacity& capacity) {
-		capacity_ = capacity;
+		if (capacity_ != capacity) {
+			capacity_ = capacity;
+			post(this, &Notifiee::onCapacity);
+		}
 	}
 
 	void speedIs(const VehicleSpeed& speed) {
-		speed_ = speed;
+		if (speed_ != speed) {
+			speed_ = speed;
+			post(this, &Notifiee::onSpeed);
+		}
 	}
 
 	void costIs(const VehicleCost& cost) {
-		cost_ = cost;
+		if (cost_ != cost) {
+			cost_ = cost;
+			post(this, &Notifiee::onCost);
+		}
 	}
 
 	NotifieeList& notifiees() {

@@ -8,8 +8,9 @@ using fwk::NotifierLib::post;
 using fwk::Ordinal;
 using fwk::Ptr;
 
-class Location;
+
 class Segment;
+class Location;
 
 typedef Ordinal< Segment, unsigned int > SegmentLength;
 
@@ -23,10 +24,10 @@ public:
 		}
 
 		/* Notification that the 'source' of this segment has been modified */
-		virtual void onSource() { }
+		virtual void onSource(const Ptr<Location>& prevSource) { }
 
 		/* Notification that the 'destination' of this segment has been modified */
-		virtual void onDestination() { }
+		virtual void onDestination(const Ptr<Location>& prevDestination) { }
 
 		/* Notification that the 'length' of this segment has been modified */
 		virtual void onLength() { }
@@ -54,15 +55,26 @@ public:
 	}
 
 	void sourceIs(const Ptr<Location>& source) {
-		source_ = source;
+		if (source_ != source) {
+			const auto prevSource = source_;
+			source_ = source;
+			post(this, &Notifiee::onSource, prevSource);
+		}
 	}
 
 	void destinationIs(const Ptr<Location>& destination) {
-		destination_ = destination;
+		if (destination_ != destination) {
+			const auto prevDestination = destination_;
+			destination_ = destination;
+			post(this, &Notifiee::onDestination, prevDestination);
+		}
 	}
 
 	void lengthIs(const SegmentLength& length) {
-		length_ = length;
+		if (length_ != length) {
+			length_ = length;
+			post(this, &Notifiee::onLength);
+		}
 	}
 
 	NotifieeList& notifiees() {
