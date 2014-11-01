@@ -233,6 +233,14 @@ public:
 		const auto location = iter->second;
 		locationMap_.erase(iter);
 
+		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
+			location->sourceSegment(i)->sourceIs(null);
+		}
+
+		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
+			location->destinationSegment(i)->destinationIs(null);
+		}
+
 		post(this, &Notifiee::onLocationDel, location);
 
 		return location;

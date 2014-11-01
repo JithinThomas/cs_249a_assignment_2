@@ -82,9 +82,9 @@ TEST(LocationAndSegment, segmentSourceAndDestChanges) {
 
 TEST(LocationAndSegment, multipleSegments) {
 	const auto manager = TravelManager::instanceNew("manager-1");
-	const auto loc1 = manager->residenceNew("residence-1");
-	const auto loc2 = manager->residenceNew("residence-2");
-	const auto loc3 = manager->residenceNew("residence-3");
+	const auto loc1 = manager->airportNew("location-1");
+	const auto loc2 = manager->airportNew("location-2");
+	const auto loc3 = manager->residenceNew("location-3");
 
 	const auto seg1 = manager->roadNew("segment-1");
 	seg1->sourceIs(loc1);
@@ -106,6 +106,29 @@ TEST(LocationAndSegment, multipleSegments) {
 
 	ASSERT_EQ(loc3->sourceSegmentCount(), 0);
 	ASSERT_EQ(loc3->destinationSegmentCount(), 2);
+}
+
+TEST(LocationAndSegment, locationDel) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto loc1 = manager->residenceNew("location-1");
+	const auto loc2 = manager->airportNew("location-2");
+	const auto loc3 = manager->residenceNew("location-3");
+
+	const auto seg1 = manager->roadNew("segment-1");
+	seg1->sourceIs(loc2);
+	seg1->destinationIs(loc3);
+
+	ASSERT_EQ(seg1->source(), loc2);
+	ASSERT_EQ(seg1->destination(), loc3);
+
+	manager->locationDel(loc3->name());
+
+	ASSERT_EQ(seg1->source(), loc2);
+	ASSERT_EQ(seg1->destination(), null);
+
+	manager->locationDel(loc2->name());	
+	ASSERT_EQ(seg1->source(), null);
+	ASSERT_EQ(seg1->destination(), null);
 }
 
 
