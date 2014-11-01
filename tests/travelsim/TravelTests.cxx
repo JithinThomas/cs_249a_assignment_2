@@ -118,8 +118,15 @@ TEST(LocationAndSegment, locationDel) {
 	seg1->sourceIs(loc2);
 	seg1->destinationIs(loc3);
 
+	const auto seg2 = manager->roadNew("segment-2");
+	seg2->sourceIs(loc1);
+	seg2->destinationIs(loc2);
+
 	ASSERT_EQ(seg1->source(), loc2);
 	ASSERT_EQ(seg1->destination(), loc3);
+
+	ASSERT_EQ(seg2->source(), loc1);
+	ASSERT_EQ(seg2->destination(), loc2);
 
 	manager->locationDel(loc3->name());
 
@@ -127,8 +134,12 @@ TEST(LocationAndSegment, locationDel) {
 	ASSERT_EQ(seg1->destination(), null);
 
 	manager->locationDel(loc2->name());	
+
 	ASSERT_EQ(seg1->source(), null);
 	ASSERT_EQ(seg1->destination(), null);
+
+	ASSERT_EQ(seg2->source(), loc1);
+	ASSERT_EQ(seg2->destination(), null);
 }
 
 
