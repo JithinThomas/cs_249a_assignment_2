@@ -176,9 +176,7 @@ public:
 		const auto flight = Flight::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, flight));
 		
-		const auto segmentTracker = SegmentTracker::instanceNew();
-		segmentTracker->notifierIs(flight);
-		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(name, segmentTracker));
+		addSegmentTracker(flight);
 
 		post(this, &Notifiee::onFlightNew, flight);
 
@@ -193,9 +191,7 @@ public:
 		const auto road = Road::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, road));
 
-		const auto segmentTracker = SegmentTracker::instanceNew();
-		segmentTracker->notifierIs(road);
-		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(name, segmentTracker));
+		addSegmentTracker(road);
 
 		post(this, &Notifiee::onRoadNew, road);
 
@@ -300,6 +296,12 @@ private:
 		return (isKeyPresent(locationMap_, name) ||
 				isKeyPresent(segmentMap_, name) ||
 				isKeyPresent(vehicleMap_, name));
+	}
+
+	void addSegmentTracker(const Ptr<Segment>& segment) {
+		const auto segmentTracker = SegmentTracker::instanceNew();
+		segmentTracker->notifierIs(segment);
+		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(segment->name(), segmentTracker));
 	}
 
 	LocationMap locationMap_;
