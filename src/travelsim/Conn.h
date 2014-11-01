@@ -129,8 +129,9 @@ private:
 							  ) const {
 		PathVector validPaths;
 
-		for (auto it = location->segmentIter(); it != location->segmentIterEnd(); it++) {
-			auto segment = *it;
+		//for (auto it = location->segmentIter(); it != location->segmentIterEnd(); it++) {
+		for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
+			auto segment = location->sourceSegment(i);
 			SegmentLength totalLengthOfPath = pathFromStartLocation->length() + segment->length();
 			auto destination = segment->destination();
 

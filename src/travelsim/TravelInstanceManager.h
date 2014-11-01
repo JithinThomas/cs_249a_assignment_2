@@ -51,7 +51,7 @@ protected:
         _noinline
         string attribute(const string& name) {
             const auto i = segmentNumber(name) - 1;
-            const auto segment = location_->segment(i);
+            const auto segment = location_->sourceSegment(i);
 
             return nameOfEntity(segment);
         }

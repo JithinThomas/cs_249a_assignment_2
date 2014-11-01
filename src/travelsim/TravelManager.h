@@ -40,11 +40,11 @@ public:
 
 	virtual void onSource(const Ptr<Location>& prevSource) { 
 		if (prevSource != null) {
-			prevSource->segmentDel(notifier());
+			prevSource->sourceSegmentDel(notifier());
 		}
 
 		auto currSource = notifier()->source();
-		currSource->segmentIs(notifier());
+		currSource->sourceSegmentIs(notifier());
 	}
 
 private:
@@ -85,6 +85,15 @@ public:
 
 		/* Notification that a new Car has been instantiated */
 		virtual void onCarNew(const Ptr<Car>& car) { }
+
+		/* Notification that a Location has been deleted */
+		virtual void onLocationDel(const Ptr<Location>& location) { }
+
+		/* Notification that a Segment has been deleted */
+		virtual void onSegmentDel(const Ptr<Segment>& segment) { }
+
+		/* Notification that a Vehicle has been deleted */
+		virtual void onVehicleDel(const Ptr<Vehicle>& vehicle) { }
 	};
 
 	static Ptr<TravelManager> instanceNew(const string& name) {
@@ -208,6 +217,48 @@ public:
 		post(this, &Notifiee::onCarNew, car);
 
 		return car;
+	}
+
+	Ptr<Location> locationDel(const string& name) {
+		auto iter = locationMap_.find(name);
+		if (iter == locationMap_.end()) {
+			return null;
+		}
+
+		const auto location = iter->second;
+		locationMap_.erase(iter);
+
+		post(this, &Notifiee::onLocationDel, location);
+
+		return location;
+	}
+
+	Ptr<Segment> segmentDel(const string& name) {
+		auto iter = segmentMap_.find(name);
+		if (iter == segmentMap_.end()) {
+			return null;
+		}
+
+		const auto segment = iter->second;
+		segmentMap_.erase(iter);
+
+		post(this, &Notifiee::onSegmentDel, segment);
+
+		return segment;
+	}
+
+	Ptr<Vehicle> vehicleDel(const string& name) {
+		auto iter = vehicleMap_.find(name);
+		if (iter == vehicleMap_.end()) {
+			return null;
+		}
+
+		const auto vehicle = iter->second;
+		vehicleMap_.erase(iter);
+
+		post(this, &Notifiee::onVehicleDel, vehicle);
+
+		return vehicle;
 	}
 
 	NotifieeList& notifiees() {

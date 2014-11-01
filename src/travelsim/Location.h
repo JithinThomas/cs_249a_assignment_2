@@ -27,10 +27,16 @@ public:
 		}
 
 		/* Notification that this location has been set as the 'source' of a segment */
-		virtual void onSegmentNew(const Ptr<Segment>& segment) { };
+		virtual void onSourceSegmentNew(const Ptr<Segment>& segment) { };
 
 		/* Notification that this location has been removed/unset as the 'source' of a segment */
-		virtual void onSegmentDel(const Ptr<Segment>& segment) { };
+		virtual void onSourceSegmentDel(const Ptr<Segment>& segment) { };
+
+		/* Notification that this location has been set as the 'destination' of a segment */
+		virtual void onDestinationSegmentNew(const Ptr<Segment>& segment) { };
+
+		/* Notification that this location has been removed/unset as the 'destination' of a segment */
+		virtual void onDestinationSegmentDel(const Ptr<Segment>& segment) { };
 	};
 
 protected:
@@ -46,43 +52,66 @@ public:
 		return new Location(name);
 	}
 
-	Ptr<Segment> segment(const U32 id) const {
-		if (id < segments_.size()) {
-			return segments_[id];
+	Ptr<Segment> sourceSegment(const U32 id) const {
+		return findSegment(sourceSegments_, id);
+	}
+
+	Ptr<Segment> destinationSegment(const U32 id) const {
+		return findSegment(destinationSegments_, id);
+	}
+
+	const_iterator sourceSegmentIter() const {
+		return sourceSegments_.cbegin();
+	}
+
+	const_iterator sourceSegmentIterEnd() const {
+		return sourceSegments_.cend();
+	}
+
+	const_iterator destinationSegmentIter() const {
+		return destinationSegments_.cbegin();
+	}
+
+	const_iterator destinationSegmentIterEnd() const {
+		return destinationSegments_.cend();
+	}
+
+	unsigned int sourceSegmentCount() const {
+		return sourceSegments_.size();
+	}
+
+	unsigned int destinationSegmentCount() const {
+		return destinationSegments_.size();
+	}
+
+	void sourceSegmentIs(const Ptr<Segment>& segment) {
+		auto res = addSegment(sourceSegments_, segment);
+		if (res) {
+			post(this, &Notifiee::onSourceSegmentNew, segment);
+		}
+	}
+
+	void destinationSegmentIs(const Ptr<Segment>& segment) {
+		auto res = addSegment(sourceSegments_, segment);
+		if (res) {
+			post(this, &Notifiee::onDestinationSegmentNew, segment);
+		}
+	}
+
+	Ptr<Segment> sourceSegmentDel(const Ptr<Segment>& segment) {
+		auto seg = deleteSegment( sourceSegments_, segment);
+		if (seg != null) {
+			post(this, &Notifiee::onSourceSegmentDel, seg);
 		}
 
-		return null;
+		return seg;
 	}
 
-	const_iterator segmentIter() const {
-		return segments_.cbegin();
-	}
-
-	const_iterator segmentIterEnd() const {
-		return segments_.cend();
-	}
-
-	unsigned int segmentCount() const {
-		return segments_.size();
-	}
-
-	void segmentIs(const Ptr<Segment> segment) {
-		if (find (segments_.begin(), segments_.end(), segment) == segments_.end()) {
-			segments_.push_back(segment); 
-			post(this, &Notifiee::onSegmentNew, segment);
+	Ptr<Segment> destinationSegmentDel(const Ptr<Segment>& segment) {
+		auto seg = deleteSegment( destinationSegments_, segment);
+		if (seg != null) {
+			post(this, &Notifiee::onDestinationSegmentDel, seg);
 		}
-	}
-
-	Ptr<Segment> segmentDel(const Ptr<Segment> segment) {
-		auto it = find( segments_.begin(), segments_.end(), segment);
-		if (it == segments_.end()) {
-			return null;
-		}
-
-		auto seg = *it;
-		segments_.erase(it);
-
-		post(this, &Notifiee::onSegmentDel, seg);
 
 		return seg;
 	}
@@ -102,7 +131,8 @@ protected:
 
 	explicit Location(const string& name) :
 		NamedInterface(name),
-		segments_(0)
+		sourceSegments_(0),
+		destinationSegments_(0)
 	{
 		// Nothing to do
 	}
@@ -112,9 +142,41 @@ protected:
 	}
 
 private:
+
+	Ptr<Segment> findSegment(const SegmentVector& segments, const U32 id) const {
+		if (id < segments.size()) {
+			return segments[id];
+		}
+
+		return null;
+	}
+
+	bool addSegment(SegmentVector& segments, const Ptr<Segment>& segment) {
+		if (find (segments.begin(), segments.end(), segment) == segments.end()) {
+			segments.push_back(segment); 
+			return true;
+		}
+
+		return false;
+	}
+
+	Ptr<Segment> deleteSegment(SegmentVector& segments, const Ptr<Segment>& segment) {
+		auto it = find( segments.begin(), segments.end(), segment);
+		if (it == segments.end()) {
+			return null;
+		}
+
+		auto seg = *it;
+		segments.erase(it);
+
+		return seg;
+	}
 	
 	/* Segments for which the Location object is the 'source' */
-	SegmentVector segments_;
+	SegmentVector sourceSegments_;
+
+	/* Segments for which the Location object is the 'destination' */
+	SegmentVector destinationSegments_;
 };
 
 class Airport : public Location {
