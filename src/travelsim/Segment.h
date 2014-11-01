@@ -2,6 +2,8 @@
 #ifndef SEGMENT_H
 #define SEGMENT_H
 
+#include "CommonLib.h"
+
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
 using fwk::NotifierLib::post;

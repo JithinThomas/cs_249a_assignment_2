@@ -86,16 +86,33 @@ int main(const int argc, const char* const argv[]) {
     // =====================================================
 
     // Segment attributes
-    manager->instance("carSeg2")->attributeIs("length", "40ert");
-    manager->instance("carSeg2")->attributeIs("length", "a40sd");
-    manager->instance("carSeg2")->attributeIs("length", "jkl40");
-    manager->instance("carSeg2")->attributeIs("source", "jfk");
-    manager->instance("carSeg2")->attributeIs("destination", "wret");
-    manager->instance("carSeg2")->attributeIs("length", "-23");
-    manager->instance("carSeg2")->attributeIs("length", "23");
-    manager->instance("carSeg2")->attributeIs("length", "-17.234");
-    manager->instance("carSeg2")->attributeIs("length", "17.234");
-    manager->instance("carSeg1")->attribute("qwerty");
+    auto seg = manager->instance("carSeg2");
+    seg->attributeIs("length", "40ert");
+    seg->attributeIs("length", "a40sd");
+    seg->attributeIs("length", "jkl40");
+    seg->attributeIs("source", "jfk");
+    seg->attributeIs("destination", "wret");
+    seg->attributeIs("length", "-23");
+    seg->attributeIs("length", "23");
+    seg->attributeIs("length", "-17.234");
+    seg->attributeIs("length", "17.234");
+    seg->attribute("qwerty");
+
+    cout << "Attributes of 'carSeg2':" << endl;
+    cout << "Source: " <<  seg->attribute("source") << ", "
+         << "Dest: " << seg->attribute("destination") << ", "
+         << "Length: " << seg->attribute("length") << endl;
+
+    seg = manager->instance("flightSeg1");
+    seg->attributeIs("source", "stanford");
+    seg->attributeIs("destination", "menlopark");
+    seg->attribute("source");
+    seg->attribute("destination");
+
+    cout << "Attributes of 'flightSeg1':" << endl;
+    cout << "Source: " <<  seg->attribute("source") << ", "
+         << "Dest: " << seg->attribute("destination") << ", "
+         << "Length: " << seg->attribute("length") << endl;
 
     // Vehicle attributes
     manager->instance("car")->attributeIs("speed", "-12.802");
