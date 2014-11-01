@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "fwk/fwk.h"
 #include "TravelManager.h"
-#include "Stats.h"
+#include "TravelManagerTracker.h"
 #include "Conn.h"
 
 using std::to_string;
@@ -29,12 +29,60 @@ TEST(TravelManager, locationNew) {
 
 TEST(Stats, onResidenceNew) {
 	const auto manager = TravelManager::instanceNew("manager-1");
-	const auto stats = Stats::instanceNew("stats-1", manager);
+	const auto stats = TravelManagerTracker::instanceNew("stats-1");
+	stats->notifierIs(manager);
 
-	//ASSERT_TRUE(stats->tracker().residenceCount() == 0);
+	ASSERT_EQ(stats->residenceCount(), 0);
 
 	manager->residenceNew("location-1");
 	manager->residenceNew("location-2");
 
-	//ASSERT_TRUE(stats->tracker().residenceCount() == 2);
+	ASSERT_EQ(stats->residenceCount(), 2);
 }
+
+TEST(TravelManager, segmentSourceAndDestChanges) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto loc1 = manager->residenceNew("residence-1");
+	const auto loc2 = manager->residenceNew("residence-2");
+	const auto loc3 = manager->residenceNew("residence-3");
+	const auto loc4 = manager->airportNew("airport-1");
+	const auto loc5 = manager->airportNew("airport-2");
+
+	const auto seg1 = manager->roadNew("segment-1");
+	seg1->sourceIs(loc1);
+	seg1->destinationIs(loc2);
+
+	ASSERT_EQ(loc1->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc1->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc2->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc2->destinationSegmentCount(), 1);
+
+	ASSERT_EQ(loc1->sourceSegment(0), seg1);
+	ASSERT_EQ(loc2->destinationSegment(0), seg1);
+
+	seg1->sourceIs(loc3);
+	seg1->destinationIs(loc4);
+
+	ASSERT_EQ(loc1->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc1->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc2->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc2->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc3->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc3->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc4->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc4->destinationSegmentCount(), 1);
+
+	ASSERT_EQ(loc3->sourceSegment(0),seg1);
+	ASSERT_EQ(loc4->destinationSegment(0), seg1);
+}
+
+
+
+
+
+
+

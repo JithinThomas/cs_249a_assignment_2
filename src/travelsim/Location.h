@@ -92,7 +92,7 @@ public:
 	}
 
 	void destinationSegmentIs(const Ptr<Segment>& segment) {
-		auto res = addSegment(sourceSegments_, segment);
+		auto res = addSegment(destinationSegments_, segment);
 		if (res) {
 			post(this, &Notifiee::onDestinationSegmentNew, segment);
 		}

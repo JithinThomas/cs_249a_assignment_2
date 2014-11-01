@@ -47,6 +47,15 @@ public:
 		currSource->sourceSegmentIs(notifier());
 	}
 
+	virtual void onDestination(const Ptr<Location>& prevDestination) { 
+		if (prevDestination != null) {
+			prevDestination->destinationSegmentDel(notifier());
+		}
+
+		auto currDestination = notifier()->destination();
+		currDestination->destinationSegmentIs(notifier());
+	}
+
 private:
 
 	Ptr<TravelManager> travelManager_;
