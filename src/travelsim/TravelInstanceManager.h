@@ -263,7 +263,6 @@ protected:
             auto paths = conn_->paths(location, SegmentLength(maxLength));
             string allPathsStr = "";
             for (auto p : paths) {
-                //allPathsStr += p.value() + "\n";
                 allPathsStr += p->toString() + "\n";
             }
 

@@ -40,7 +40,6 @@ public:
 
 	virtual void onSource(const Ptr<Location>& prevSource) { 
 		if (prevSource != null) {
-			cout << prevSource->name() << endl;
 			prevSource->segmentDel(notifier());
 		}
 

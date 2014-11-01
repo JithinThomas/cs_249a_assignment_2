@@ -62,10 +62,20 @@ int main(const int argc, const char* const argv[]) {
 
     const auto query1 = "explore sfo distance 500";
     const auto query2 = "explore sfo distance 20";
+    const auto query3 = "explore sfo distance 10";
+    const auto query4 = "explore lax distance 1000";
+
     cout << "**** " << query1 << " ****" << endl;
     cout << conn->attribute(query1) << endl;
+
     cout << "**** " << query2 << " ****" << endl;
     cout << conn->attribute(query2) << endl;
+
+    cout << "**** " << query3 << " ****" << endl;
+    cout << conn->attribute(query3) << endl;
+
+    cout << "**** " << query4 << " ****" << endl;
+    cout << conn->attribute(query4) << endl;
 
     return 0;
 }
