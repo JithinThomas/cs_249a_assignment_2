@@ -2,9 +2,13 @@
 #ifndef TRAVEL_MANAGER_H
 #define TRAVEL_MANAGER_H
 
+#include "CommonLib.h"
+#include "Conn.h"
+#include "Flight.h"
 #include "Location.h"
 #include "Segment.h"
 #include "Vehicle.h"
+//#include "TravelManagerTracker.h"
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
@@ -67,6 +71,8 @@ private:
 // TravelManager class
 //=======================================================
 
+class TravelManagerTracker;
+
 class TravelManager : public NamedInterface {
 public:
 
@@ -95,6 +101,9 @@ public:
 		/* Notification that a new Car has been instantiated */
 		virtual void onCarNew(const Ptr<Car>& car) { }
 
+		/* Notification that a new Conn has been instantiated */
+		//virtual void onConnNew(const Ptr<Conn>& conn) { }
+
 		/* Notification that a Location has been deleted */
 		virtual void onLocationDel(const Ptr<Location>& location) { }
 
@@ -103,6 +112,9 @@ public:
 
 		/* Notification that a Vehicle has been deleted */
 		virtual void onVehicleDel(const Ptr<Vehicle>& vehicle) { }
+
+		/* Notification that a Conn has been deleted */
+		//virtual void onConnDel(const Ptr<Conn>& conn) { }
 	};
 
 	static Ptr<TravelManager> instanceNew(const string& name) {
@@ -144,7 +156,8 @@ public:
 
 	Ptr<Airport> airportNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto airport = Airport::instanceNew(name);
@@ -157,7 +170,8 @@ public:
 
 	Ptr<Residence> residenceNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto residence = Residence::instanceNew(name);
@@ -170,7 +184,8 @@ public:
 
   	Ptr<Flight> flightNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto flight = Flight::instanceNew(name);
@@ -185,7 +200,8 @@ public:
 
   	Ptr<Road> roadNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto road = Road::instanceNew(name);
@@ -200,7 +216,8 @@ public:
 
 	Ptr<Airplane> airplaneNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto airplane = Airplane::instanceNew(name);
@@ -213,7 +230,8 @@ public:
 
 	Ptr<Car> carNew(const string& name) {
 		if (isNameInUse(name)) {
-			throw fwk::NameInUseException(name);
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;
 		}
 
 		const auto car = Car::instanceNew(name);
@@ -224,6 +242,36 @@ public:
 		return car;
 	}
 
+	/*
+	Ptr<TravelManagerTracker> statsNew(const string& name) {
+		if (isNameInUse(name)) {
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;	
+		}
+
+		const auto stats = TravelManagerTracker::instanceNew(name);
+		statsMap_.insert(StatsMap::value_type(name, stats));
+
+		post(this, &Notifiee::onStatsNew, stats);
+
+		return stats;
+	}
+
+	Ptr<Conn> connNew(const string& name) {
+		if (isNameInUse(name)) {
+			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
+			return null;	
+		}
+
+		const auto conn = Conn::instanceNew(name);
+		connMap_.insert(ConnMap::value_type(name, conn));
+
+		post(this, &Notifiee::onConnNew, conn);
+
+		return conn;
+	}
+	*/
+
 	Ptr<Location> locationDel(const string& name) {
 		auto iter = locationMap_.find(name);
 		if (iter == locationMap_.end()) {
@@ -233,10 +281,12 @@ public:
 		const auto location = iter->second;
 		locationMap_.erase(iter);
 
+		// Nullify the 'source' attribute of all segments for which this location was the source
 		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
 			location->sourceSegment(i)->sourceIs(null);
 		}
 
+		// Nullify the 'destintaion' attribute of all segments for which this location was the destination
 		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
 			location->destinationSegment(i)->destinationIs(null);
 		}
@@ -285,9 +335,11 @@ public:
 
 protected:
 
+	//typedef unordered_map< string, Ptr<Conn> > ConnMap;
 	typedef unordered_map< string, Ptr<Location> > LocationMap;
 	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
 	typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
+	//typedef unordered_map< string, Ptr<TravelManagerTracker> > StatsMap;
 	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
 
 	NotifieeList notifiees_;
@@ -302,8 +354,10 @@ private:
 
 	bool isNameInUse(const string& name) {
 		return (isKeyPresent(locationMap_, name) ||
-				isKeyPresent(segmentMap_, name) ||
+				isKeyPresent(segmentMap_, name)  ||
 				isKeyPresent(vehicleMap_, name));
+				//isKeyPresent(statsMap_, name) ||
+				//isKeyPresent(connMap_, name));
 	}
 
 	void addSegmentTracker(const Ptr<Segment>& segment) {
@@ -312,9 +366,11 @@ private:
 		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(segment->name(), segmentTracker));
 	}
 
+	//ConnMap connMap_;
 	LocationMap locationMap_;
 	SegmentMap segmentMap_;
 	SegmentTrackerMap segmentTrackerMap_;
+	//StatsMap statsMap_;
 	VehicleMap vehicleMap_;
 };
 

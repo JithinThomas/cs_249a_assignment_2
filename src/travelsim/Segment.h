@@ -8,11 +8,14 @@ using fwk::NotifierLib::post;
 using fwk::Ordinal;
 using fwk::Ptr;
 
-
 class Segment;
 class Location;
+class Airport;
+class Residence;
 
 typedef Ordinal< Segment, unsigned int > SegmentLength;
+
+// ==================================================
 
 class Segment : public NamedInterface {
 public:
@@ -54,7 +57,8 @@ public:
 		return length_;
 	}
 
-	void sourceIs(const Ptr<Location>& source) {
+	// TODO: Should the return type be Ptr<Location>
+	virtual void sourceIs(const Ptr<Location>& source) {
 		if (source_ != source) {
 			const auto prevSource = source_;
 			source_ = source;
@@ -62,7 +66,8 @@ public:
 		}
 	}
 
-	void destinationIs(const Ptr<Location>& destination) {
+	// TODO: Should the return type be Ptr<Location>
+	virtual void destinationIs(const Ptr<Location>& destination) {
 		if (destination_ != destination) {
 			const auto prevDestination = destination_;
 			destination_ = destination;
@@ -105,24 +110,6 @@ private:
 	Ptr<Location> source_;
 	Ptr<Location> destination_;
 	SegmentLength length_;
-};
-
-class Flight : public Segment {
-public:
-
-	static Ptr<Flight> instanceNew(const string& name) {
-		return new Flight(name);
-	}
-
-protected:
-
-	Flight(const string& name) :
-		Segment(name)
-	{
-		// Nothing to do
-	}
-
-	~Flight() { }
 };
 
 class Road : public Segment {

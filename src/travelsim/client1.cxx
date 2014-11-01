@@ -23,7 +23,6 @@ int main(const int argc, const char* const argv[]) {
 
     const auto stats = manager->instanceNew("myStats", "Stats");
 
-
     const auto plane = manager->instanceNew("plane", "Airplane");
     plane->attributeIs("speed", "500");
     plane->attributeIs("capacity", "200");
@@ -49,8 +48,13 @@ int main(const int argc, const char* const argv[]) {
     segmentNew(manager, "carSeg6", "Road", "menlopark", "stanford", 5);
     segmentNew(manager, "flightSeg1", "Flight", "sfo", "lax", 350);
 
+    manager->instance("carSeg2")->attributeIs("length", "40");
+
     cout << "carSeg1.source: ";
     cout << manager->instance("carSeg1")->attribute("source") << endl;
+
+    cout << "segment1 of sfo: ";
+    cout << manager->instance("sfo")->attribute("segment1") << endl; 
 
     cout << "Stats:" << endl;
     cout << "# Residences: " << stats->attribute("Residence") << endl;
@@ -76,6 +80,38 @@ int main(const int argc, const char* const argv[]) {
 
     cout << "**** " << query4 << " ****" << endl;
     cout << conn->attribute(query4) << endl;
+
+    // =====================================================
+    //  Instructions with errorneous inputs
+    // =====================================================
+
+    // Segment attributes
+    manager->instance("carSeg2")->attributeIs("length", "40ert");
+    manager->instance("carSeg2")->attributeIs("length", "a40sd");
+    manager->instance("carSeg2")->attributeIs("length", "jkl40");
+    manager->instance("carSeg2")->attributeIs("source", "jfk");
+    manager->instance("carSeg2")->attributeIs("destination", "wret");
+    manager->instance("carSeg2")->attributeIs("length", "-23");
+    manager->instance("carSeg2")->attributeIs("length", "23");
+    manager->instance("carSeg2")->attributeIs("length", "-17.234");
+    manager->instance("carSeg2")->attributeIs("length", "17.234");
+    manager->instance("carSeg1")->attribute("qwerty");
+
+    // Vehicle attributes
+    manager->instance("car")->attributeIs("speed", "-12.802");
+    manager->instance("car")->attributeIs("capacity", "-49");
+    manager->instance("car")->attributeIs("cost", "-57.19");
+    manager->instance("car")->attribute("qwerty");
+
+    // Location attributes
+    manager->instance("stanford")->attribute("uiuuo");
+    manager->instance("sfo")->attribute("wqer");
+
+    // Conn attributes
+    conn->attribute("bnml");
+
+    // Stats attributes
+    stats->attribute("plsdf");
 
     return 0;
 }

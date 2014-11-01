@@ -4,7 +4,8 @@
 
 #include <set>
 
-#include "TravelManager.h"
+#include "Location.h"
+#include "Segment.h"
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
@@ -89,15 +90,6 @@ protected:
 	typedef vector< Ptr<Path> > PathVector;
 
 public:
-
-	const Ptr<TravelManager>& travelManager() const {
-		return travelManager_;
-	}
-
-	void travelManagerIs(const Ptr<TravelManager>& travelManager) {
-		travelManager_ = travelManager;
-	}
-
 	const PathVector paths(const Ptr<Location>& location, const SegmentLength& maxLength) const {
 		set<string> locationsVisited;
 		locationsVisited.insert(location->name());
@@ -115,7 +107,7 @@ protected:
 	Conn(const string& name):
 		NamedInterface(name)
 	{
-		travelManager_ = null;
+		// Nothing else to do
 	}
 
 	~Conn() { }
@@ -129,7 +121,6 @@ private:
 							  ) const {
 		PathVector validPaths;
 
-		//for (auto it = location->segmentIter(); it != location->segmentIterEnd(); it++) {
 		for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
 			auto segment = location->sourceSegment(i);
 			SegmentLength totalLengthOfPath = pathFromStartLocation->length() + segment->length();
@@ -152,8 +143,6 @@ private:
 
 		return validPaths;
 	}
-
-	Ptr<TravelManager> travelManager_;
 };
 
 

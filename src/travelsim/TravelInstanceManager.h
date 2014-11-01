@@ -1,6 +1,7 @@
 #ifndef TRAVELSIM_TRAVELINSTANCEMANAGER_H
 #define TRAVELSIM_TRAVELINSTANCEMANAGER_H
 
+#include "CommonLib.h"
 #include "InstanceManager.h"
 #include "TravelManager.h"
 #include "TravelManagerTracker.h"
@@ -14,14 +15,35 @@ using std::cout;
 using std::endl;
 using std::to_string;
 
-
-const string nameOfEntity(Ptr<NamedInterface> entity) {
+const string entityName(Ptr<NamedInterface> entity) {
     if (entity != null) {
         return entity->name();
     }
 
     return "";
 } 
+
+// TODO: Rename the functions?
+double strToDouble(const string& str) {
+    stringstream ss(str);
+    double value;
+    if (ss >> value) {
+        return value;
+    }
+
+    return -1;
+}
+
+// TODO: Rename the functions?
+int strToInt(const string& str) {
+    stringstream ss(str);
+    int value;
+    if (ss >> value) {
+        return value;
+    }
+
+    return -1;
+}
 
 /**
  * InstanceManager implementation for the travel simulation.
@@ -51,14 +73,19 @@ protected:
         _noinline
         string attribute(const string& name) {
             const auto i = segmentNumber(name) - 1;
-            const auto segment = location_->sourceSegment(i);
+            if (i >= 0) {
+                const auto segment = location_->sourceSegment(i);
 
-            return nameOfEntity(segment);
+                return entityName(segment);
+            }
+
+            logError(WARNING, "Invalid attribute ('" + name + "') specified for Location. Skipping command.");
+            return "";
         }
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            cerr << "[WARNING]: The segment attribute of a Location is read-only." << endl;
+            logError(WARNING, "All attributes of Location are read-only.");
         }
 
     protected:
@@ -88,19 +115,15 @@ protected:
 
         Ptr<Location> location_;
 
-        // TODO: Finish the implementation.
-
-
         _noinline
         int segmentNumber(const string& name) {
             if (name.substr(0, segmentStrlen) == segmentStr) {
-                // TODO: Check that name doesn't have extraneous characters.
-                return std::stoi(name.c_str() + segmentStrlen);
+                auto tmp = name.substr(segmentStrlen - 1, name.length() - segmentStrlen);
+                return strToInt(tmp);
             }
 
-            return 0;
+            return -1;
         }
-
     };
 
 
@@ -110,36 +133,33 @@ protected:
         _noinline
         string attribute(const string& name) {
             if (name == "source") {
-                return nameOfEntity(segment_->source());
+                return entityName(segment_->source());
             } else if (name == "destination") {
-                return nameOfEntity(segment_->destination());
+                return entityName(segment_->destination());
             } else if (name == "length") {
                 return to_string(segment_->length().value());
             }
 
-            cerr << "[WARNING]: A Segment does not have an attribute named '" << name << "'" << endl;
+            logError(WARNING, "Invalid attribute ('" + name + "') specified for Segment. Skipping command.");
             return "";
         }
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            if (segment_ == null) {
-                return;
+            if (( (segment_ != null)) && (verifyAttributeValue(name, value)) ) {
+                if (name == "source") {
+                    const auto location = travelManager_->location(value);
+                    segment_->sourceIs(location);
+                } else if (name == "destination") {
+                    const auto location = travelManager_->location(value);
+                    segment_->destinationIs(location);
+                } else if (name == "length") {
+                    auto length = SegmentLength(strToDouble(value));
+                    segment_->lengthIs(length);
+                } else {
+                    logError(WARNING, "[SegmentInstance::attributeIs]: This branch was not expected to be taken.");
+                }
             }
-
-            if (name == "source") {
-                segment_->sourceIs(travelManager_->location(value));
-                return;
-            } else if (name == "destination") {
-                segment_->destinationIs(travelManager_->location(value));
-                return;
-            } else if (name == "length") {
-                auto length = SegmentLength(stoi(value));
-                segment_->lengthIs(length);
-                return;
-            }
-
-            cerr << "[WARNING]: A Segment does not have an attribute named '" << name << "'" << endl;
         }
 
     protected:
@@ -160,10 +180,29 @@ protected:
 
     private:
 
+        bool verifyAttributeValue(const string& name, const string& value) {
+            if ((name == "source") || (name == "destination")) {
+                const auto location = travelManager_->location(value);
+                if (location == null) {
+                    logError(WARNING, "Location '" + value + "' could not be found.");
+                    return false;
+                }
+            } else if (name == "length") {
+                if (strToDouble(value) < 0) {
+                    logError(WARNING, "Invalid value ('" + value + "') specified as 'length' of segment.");
+                    return false;
+                }
+            } else {
+                logError(WARNING, "A Segment does not have an attribute named '" + name + "'.");
+                return false;
+            }
+
+            return true;
+        }
+
         friend class TravelInstanceManager;
 
         Ptr<Segment> segment_;
-        // TODO: Finish the implementation.
 
     };
 
@@ -185,28 +224,26 @@ protected:
                 return to_string(vehicle_->cost());
             }
 
-            cerr << "[WARNING]: A Vehicle does not have an attribute named '" << name << "'" << endl;
+            logError(WARNING, "Invalid attribute ('" + name + "') specified for Vehicle. Skipping command.");
             return "";
         }
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            if (vehicle_ == null) {
-                return;
+            if ( (vehicle_ != null) && (verifyAttributeValue(name, value)) ) {
+                if (name == "capacity") {
+                    vehicle_->capacityIs(strToInt(value));
+                    return;
+                } else if (name == "speed") {
+                    vehicle_->speedIs(strToDouble(value));
+                    return;
+                } else if (name == "cost") {
+                    vehicle_->costIs(strToDouble(value));
+                    return;
+                } else {
+                    logError(WARNING, "[VehicleInstance::attributeIs]: This branch was not expected to be taken.");
+                }
             }
-
-            if (name == "capacity") {
-                vehicle_->capacityIs(stoi(value));
-                return;
-            } else if (name == "speed") {
-                vehicle_->speedIs(stoi(value));
-                return;
-            } else if (name == "cost") {
-                vehicle_->costIs(stoi(value));
-                return;
-            }
-
-            cerr << "[WARNING]: A Vehicle does not have an attribute named '" << name << "'" << endl;
         }
 
     protected:
@@ -227,6 +264,25 @@ protected:
 
     private:
 
+        bool verifyAttributeValue(const string& name, const string& value) {
+            if (name == "capacity") {
+                if (strToInt(value) < 0) {
+                    logError(WARNING, "Invalid value ('" + value + "') specified as 'capacity' of vehicle.");
+                    return false;
+                }
+            } else if ((name == "cost") || (name == "speed")) {
+                if (strToDouble(value) < 0) {
+                    logError(WARNING, "Invalid value ('" + value + "') specified as '" + name + "' of vehicle.");
+                    return false;
+                }
+            } else {
+                logError(WARNING, "A Vehicle does not have an attribute named '" + name + "'.");
+                return false;
+            }
+
+            return true;
+        }
+
         friend class TravelInstanceManager;
 
         Ptr<Vehicle> vehicle_;
@@ -246,6 +302,7 @@ protected:
             string cmd;
             ss >> cmd;
             if (cmd != "explore") {
+                logError(WARNING, "Invalid attribute ('" + name + "') specified for Conn. Skipping command.");
                 return "";
             }
 
@@ -271,7 +328,7 @@ protected:
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            cerr << "[WARNING]: Writes are not allowed to Conn entities." << endl;
+            logError(WARNING, "All attributes of Conn are read-only.");
         }
 
     protected:
@@ -317,13 +374,13 @@ protected:
                 return to_string(stats_->roadCount());
             }
 
-            cerr << "[WARNING]: Stats does not support an attribute named '" << name << "'" << endl;
+            logError(WARNING, "Invalid attribute ('" + name + "') specified for Stats. Skipping command.");
             return "";
         }
 
         _noinline
         void attributeIs(const string& name, const string& value) {
-            cerr << "[WARNING]: Writes are not allowed to Stats entities." << endl;
+            logError(WARNING, "All attributes of Stats are read-only.");
         }
 
     protected:
@@ -347,7 +404,6 @@ protected:
         friend class TravelInstanceManager;
 
         Ptr<TravelManagerTracker> stats_;
-        // TODO: Finish the implementation.
 
     };
 
@@ -371,7 +427,6 @@ protected:
 
         connInstance_ = new ConnInstance("conn");
         auto conn = Conn::instanceNew("conn");
-        conn->travelManagerIs(travelManager_);
         connInstance_->connIs(conn);
         connInstance_->travelManagerIs(travelManager_);
     }
