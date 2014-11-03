@@ -66,13 +66,13 @@ public:
 protected:
 
 	explicit TravelManagerTracker(const string& name) :
-		name_(name),
 		airplaneCount_(0),
 		airportCount_(0),
 		carCount_(0),
 		flightCount_(0),
 		residenceCount_(0),
-		roadCount_(0)
+		roadCount_(0),
+		name_(name)
 	{
 
 	}
