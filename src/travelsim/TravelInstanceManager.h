@@ -278,6 +278,7 @@ protected:
 
             ss >> cmd >> maxLength;
             if (cmd != "distance") {
+                logError(WARNING, "Invalid attribute ('" + name + "') specified for Conn. Skipping command.");
                 return "";
             }
 
