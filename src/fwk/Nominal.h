@@ -31,11 +31,11 @@ public:
     }
 
 
-    bool operator ==(const Nominal& v) const {
+    virtual bool operator ==(const Nominal& v) const {
         return value_ == v.value_;
     }
 	
-    bool operator !=(const Nominal& v) const {
+    virtual bool operator !=(const Nominal& v) const {
         return value_ != v.value_;
     }
 

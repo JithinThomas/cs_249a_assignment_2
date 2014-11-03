@@ -33,7 +33,6 @@ int main(const int argc, const char* const argv[]) {
     car->attributeIs("capacity", "5");
     car->attributeIs("cost", "0.75");
 
-
     manager->instanceNew("stanford", "Residence");  
     manager->instanceNew("menlopark", "Residence");  
 
@@ -55,6 +54,15 @@ int main(const int argc, const char* const argv[]) {
 
     cout << "segment1 of sfo: ";
     cout << manager->instance("sfo")->attribute("segment1") << endl; 
+
+    cout << "segment2 of sfo: ";
+    cout << manager->instance("sfo")->attribute("segment2") << endl; 
+
+    cout << "segment3 of sfo: ";
+    cout << manager->instance("sfo")->attribute("segment3") << endl; 
+
+    cout << "segment4 of sfo: ";
+    cout << manager->instance("sfo")->attribute("segment4") << endl; 
 
     cout << "Stats:" << endl;
     cout << "# Residences: " << stats->attribute("Residence") << endl;
@@ -96,6 +104,7 @@ int main(const int argc, const char* const argv[]) {
     seg->attributeIs("length", "23");
     seg->attributeIs("length", "-17.234");
     seg->attributeIs("length", "17.234");
+    seg->attributeIs("jklse", "17.234");
     seg->attribute("qwerty");
 
     cout << "Attributes of 'carSeg2':" << endl;
@@ -115,13 +124,16 @@ int main(const int argc, const char* const argv[]) {
          << "Length: " << seg->attribute("length") << endl;
 
     // Vehicle attributes
-    manager->instance("car")->attributeIs("speed", "-12.802");
-    manager->instance("car")->attributeIs("capacity", "-49");
-    manager->instance("car")->attributeIs("cost", "-57.19");
-    manager->instance("car")->attribute("qwerty");
+    car->attributeIs("speed", "-12.802");
+    car->attributeIs("capacity", "-49");
+    car->attributeIs("cost", "-57.19");
+    car->attributeIs("upoi", "-57.19");
+    car->attribute("qwerty");
 
     // Location attributes
     manager->instance("stanford")->attribute("uiuuo");
+    manager->instance("stanford")->attribute("segment0");
+    manager->instance("stanford")->attribute("segment-1");
     manager->instance("sfo")->attribute("wqer");
 
     // Conn attributes

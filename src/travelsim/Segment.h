@@ -15,7 +15,32 @@ class Location;
 class Airport;
 class Residence;
 
-typedef Ordinal< Segment, unsigned int > SegmentLength;
+//typedef Ordinal< Segment, unsigned int > SegmentLength;
+
+class Length {};
+class Miles : public Ordinal<Length, int> {
+public:
+
+	Miles(const int value = 0) :
+		Ordinal(value)
+	{
+		if (value < 0) {
+			throw fwk::RangeException("Miles cannot be negative ('" + std::to_string(value) + "')");
+		}
+	}
+
+	Miles(const Ordinal<Length, int>& c) :
+		Ordinal(c.value()) 
+	{
+		// Nothing else to do
+	}
+
+	Miles(const Miles& m):
+		Ordinal(m.value())
+	{
+		// Nothing else to do
+	}	
+};
 
 // ==================================================
 
@@ -55,7 +80,7 @@ public:
 		return destination_;
 	}
 
-	SegmentLength length() const {
+	Miles length() const {
 		return length_;
 	}
 
@@ -77,7 +102,7 @@ public:
 		}
 	}
 
-	void lengthIs(const SegmentLength& length) {
+	void lengthIs(const Miles& length) {
 		if (length_ != length) {
 			length_ = length;
 			post(this, &Notifiee::onLength);
@@ -111,7 +136,7 @@ private:
 
 	Ptr<Location> source_;
 	Ptr<Location> destination_;
-	SegmentLength length_;
+	Miles length_;
 };
 
 class Road : public Segment {

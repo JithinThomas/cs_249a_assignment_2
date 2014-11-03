@@ -38,7 +38,7 @@ public:
 		return segments_;
 	}
 
-	SegmentLength length() const {
+	Miles length() const {
 		return length_;
 	}
 
@@ -75,7 +75,7 @@ protected:
 private:
 
 	vector< Ptr<Segment> > segments_;
-	SegmentLength length_;
+	Miles length_;
 };
 
 class Conn : public NamedInterface {
@@ -90,7 +90,7 @@ protected:
 	typedef vector< Ptr<Path> > PathVector;
 
 public:
-	const PathVector paths(const Ptr<Location>& location, const SegmentLength& maxLength) const {
+	const PathVector paths(const Ptr<Location>& location, const Miles& maxLength) const {
 		set<string> locationsVisited;
 		locationsVisited.insert(location->name());
 
@@ -116,14 +116,14 @@ private:
 
 	PathVector getPathsFromLoc(const Ptr<Location>& location,
 							   const Ptr<Path>& pathFromStartLocation,
-							   const SegmentLength& maxLength, 
+							   const Miles& maxLength, 
 							   set<string> locationsVisited
 							  ) const {
 		PathVector validPaths;
 
 		for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
 			auto segment = location->sourceSegment(i);
-			SegmentLength totalLengthOfPath = pathFromStartLocation->length() + segment->length();
+			Miles totalLengthOfPath = pathFromStartLocation->length() + segment->length();
 			auto destination = segment->destination();
 
 			if ((totalLengthOfPath <= maxLength) && (locationsVisited.find(destination->name()) == locationsVisited.end())) {
