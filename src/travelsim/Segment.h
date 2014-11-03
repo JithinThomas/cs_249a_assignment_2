@@ -36,7 +36,7 @@ public:
 	}
 
 	Miles(const Miles& m):
-		Ordinal(m.value())
+		Ordinal(m.value_)
 	{
 		// Nothing else to do
 	}	

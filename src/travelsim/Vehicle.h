@@ -14,6 +14,7 @@ class Capacity {};
 class VehicleCapacity : public Ordinal<Capacity, int> {
 public:
 
+	// TODO: Is there a better way than defining these 3 constructors?
 	VehicleCapacity(const int value = 0) :
 		Ordinal(value)
 	{
@@ -29,7 +30,7 @@ public:
 	}
 
 	VehicleCapacity(const VehicleCapacity& c):
-		Ordinal(c.value())
+		Ordinal(c.value_)
 	{
 		// Nothing else to do
 	}	
@@ -54,7 +55,7 @@ public:
 	}
 
 	MilesPerHour(const MilesPerHour& m):
-		Ordinal(m.value())
+		Ordinal(m.value_)
 	{
 		// Nothing else to do
 	}	

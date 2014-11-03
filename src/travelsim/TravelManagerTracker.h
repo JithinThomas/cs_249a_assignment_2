@@ -4,6 +4,8 @@
 
 #include "TravelManager.h"
 
+// TODO: Implement the onLocationDel, etc. notification methods
+
 class TravelManagerTracker : public TravelManager::Notifiee {
 public:
 

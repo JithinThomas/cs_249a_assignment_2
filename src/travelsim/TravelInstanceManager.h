@@ -107,7 +107,6 @@ protected:
 
         friend class TravelInstanceManager;
 
-
         static const string segmentStr;
 
         static const unsigned long segmentStrlen;

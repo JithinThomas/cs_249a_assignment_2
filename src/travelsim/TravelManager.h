@@ -83,6 +83,9 @@ public:
 			connect(travelManager, this);
 		}
 
+		// TODO: Just have a notification for LocationNew, SegmentNew and VehicleNew
+		//       The implementation class can check the dynamic type of the new object and act accordingly
+
 		/* Notification that a new Residence has been instantiated */
 		virtual void onResidenceNew(const Ptr<Residence>& residence) { }
 
