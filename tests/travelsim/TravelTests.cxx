@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "fwk/fwk.h"
 #include "TravelManager.h"
-#include "TravelManagerTracker.h"
 #include "Conn.h"
 
 using std::to_string;
@@ -29,8 +28,7 @@ TEST(TravelManager, locationNew) {
 
 TEST(Stats, onResidenceNew) {
 	const auto manager = TravelManager::instanceNew("manager-1");
-	const auto stats = TravelManagerTracker::instanceNew("stats-1");
-	stats->notifierIs(manager);
+	const auto stats = manager->stats();
 
 	ASSERT_EQ(stats->residenceCount(), 0);
 
