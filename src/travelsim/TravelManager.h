@@ -176,6 +176,14 @@ public:
 		return findVehicleOfSpecificType<Car>(name);
 	}
 
+	Ptr<Conn> conn() const {
+		return conn_;
+	}
+
+	Ptr<TravelManagerTracker> stats() const {
+		return stats_;
+	}
+
 	locationConstIter locationIter() {
 		return locationMap_.cbegin();
 	}
@@ -372,13 +380,9 @@ public:
 
 protected:
 
-	NotifieeList notifiees_;
+	explicit TravelManager(const string& name);
 
-	explicit TravelManager(const string& name) :
-		NamedInterface(name)
-	{
-		// Nothing to do
-	}
+	NotifieeList notifiees_;
 
 private:
 
@@ -447,38 +451,105 @@ private:
 	SegmentMap segmentMap_;
 	SegmentTrackerMap segmentTrackerMap_;
 	VehicleMap vehicleMap_;
+	Ptr<Conn> conn_;
+	Ptr<TravelManagerTracker> stats_;
 };
 
+//=======================================================
+// TravelManagerTracker class
+//=======================================================
 
+class TravelManagerTracker : public TravelManager::Notifiee {
+public:
 
-	/*
-	Ptr<TravelManagerTracker> statsNew(const string& name) {
-		if (isNameInUse(name)) {
-			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
-			return null;	
-		}
-
-		const auto stats = TravelManagerTracker::instanceNew(name);
-		statsMap_.insert(StatsMap::value_type(name, stats));
-
-		post(this, &Notifiee::onStatsNew, stats);
-
-		return stats;
+	static Ptr<TravelManagerTracker> instanceNew(const string& name) {
+		return new TravelManagerTracker(name);
 	}
 
-	Ptr<Conn> connNew(const string& name) {
-		if (isNameInUse(name)) {
-			logError(WARNING, "An instance with the given name '" + name + "' already exists. Skipping command.");
-			return null;	
-		}
-
-		const auto conn = Conn::instanceNew(name);
-		connMap_.insert(ConnMap::value_type(name, conn));
-
-		post(this, &Notifiee::onConnNew, conn);
-
-		return conn;
+	unsigned int residenceCount() const {
+		return residenceCount_;
 	}
-	*/
+
+	unsigned int airportCount() const {
+		return airportCount_;
+	}
+
+	unsigned int flightCount() const {
+		return flightCount_;
+	}
+
+	unsigned int roadCount() const {
+		return roadCount_;
+	}
+
+	unsigned int airplaneCount() const {
+		return airplaneCount_;
+	}
+
+	unsigned int carCount() const {
+		return carCount_;
+	}
+
+	void onResidenceNew(const Ptr<Residence>& residence) {
+		residenceCount_++;
+	}
+
+	void onAirportNew(const Ptr<Airport>& airport) {
+		airportCount_++;
+	}
+
+	void onFlightNew(const Ptr<Flight>& flight) {
+		flightCount_++;
+	}
+
+	void onRoadNew(const Ptr<Road>& road) {
+		roadCount_++;
+	}
+
+	void onAirplaneNew(const Ptr<Airplane>& airplane) {
+		airplaneCount_++;
+	}
+
+	void onCarNew(const Ptr<Car>& car) {
+		carCount_++;
+	}
+
+	const string& name() const {
+		return name_;
+	}
+
+protected:
+
+	explicit TravelManagerTracker(const string& name) :
+		airplaneCount_(0),
+		airportCount_(0),
+		carCount_(0),
+		flightCount_(0),
+		residenceCount_(0),
+		roadCount_(0),
+		name_(name)
+	{
+
+	}
+
+private:
+	unsigned int airplaneCount_;
+	unsigned int airportCount_;
+	unsigned int carCount_;
+	unsigned int flightCount_;
+	unsigned int residenceCount_;
+	unsigned int roadCount_;
+
+	string name_;
+};
+
+TravelManager::TravelManager(const string& name) :
+	NamedInterface(name)
+{
+	// Nothing to do
+	conn_ = Conn::instanceNew("");
+	stats_ = TravelManagerTracker::instanceNew("");
+	stats_->notifierIs(this);
+}
 
 #endif

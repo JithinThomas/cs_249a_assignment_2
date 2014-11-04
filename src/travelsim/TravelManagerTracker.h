@@ -67,6 +67,8 @@ public:
 
 protected:
 
+	friend class TravelManager;
+
 	explicit TravelManagerTracker(const string& name) :
 		airplaneCount_(0),
 		airportCount_(0),
