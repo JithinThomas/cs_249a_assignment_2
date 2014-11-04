@@ -38,31 +38,32 @@ class TravelManager;
 class SegmentTracker : public Segment::Notifiee {
 public:
 
-	static Ptr<SegmentTracker> instanceNew() {
-		return new SegmentTracker();
-	}
-
-	virtual void onSource(const Ptr<Location>& prevSource) { 
-		if (prevSource != null) {
-			prevSource->sourceSegmentDel(notifier());
+	virtual void onSource() { 
+		if (prevSource_ != null) {
+			prevSource_->sourceSegmentDel(notifier());
 		}
 
 		auto currSource = notifier()->source();
 		currSource->sourceSegmentIs(notifier());
+
+		prevSource_ = currSource;
 	}
 
-	virtual void onDestination(const Ptr<Location>& prevDestination) { 
-		if (prevDestination != null) {
-			prevDestination->destinationSegmentDel(notifier());
+	virtual void onDestination() { 
+		if (prevDestination_ != null) {
+			prevDestination_->destinationSegmentDel(notifier());
 		}
 
 		auto currDestination = notifier()->destination();
 		currDestination->destinationSegmentIs(notifier());
+
+		prevDestination_ = currDestination;
 	}
 
 private:
 
-	Ptr<TravelManager> travelManager_;
+	Ptr<Location> prevSource_;
+	Ptr<Location> prevDestination_;
 };
 
 //=======================================================
@@ -122,7 +123,7 @@ protected:
 
 	typedef unordered_map< string, Ptr<Location> > LocationMap;
 	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
-	typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
+	//typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
 	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
 
 	typedef LocationMap::const_iterator locationConstIter;
@@ -331,6 +332,10 @@ public:
 		const auto segment = iter->second;
 		auto next = segmentMap_.erase(iter);
 
+		auto segmentTracker = segmentToTracker_[segment->name()];
+		delete segmentTracker;
+		segmentToTracker_.erase(segment->name());
+
 		post(this, &Notifiee::onSegmentDel, segment);
 
 		return next;
@@ -442,14 +447,14 @@ private:
 	}
 
 	void addSegmentTracker(const Ptr<Segment>& segment) {
-		const auto segmentTracker = SegmentTracker::instanceNew();
+		const auto segmentTracker = new SegmentTracker();
 		segmentTracker->notifierIs(segment);
-		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(segment->name(), segmentTracker));
+		segmentToTracker_[segment->name()] = segmentTracker;
 	}
 
 	LocationMap locationMap_;
 	SegmentMap segmentMap_;
-	SegmentTrackerMap segmentTrackerMap_;
+	unordered_map<string, SegmentTracker*> segmentToTracker_;
 	VehicleMap vehicleMap_;
 	Ptr<Conn> conn_;
 	Ptr<TravelManagerTracker> stats_;

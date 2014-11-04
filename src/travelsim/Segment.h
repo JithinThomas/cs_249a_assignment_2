@@ -54,10 +54,12 @@ public:
 		}
 
 		/* Notification that the 'source' of this segment has been modified */
-		virtual void onSource(const Ptr<Location>& prevSource) { }
+		//virtual void onSource(const Ptr<Location>& prevSource) { }
+		virtual void onSource() { }
 
 		/* Notification that the 'destination' of this segment has been modified */
-		virtual void onDestination(const Ptr<Location>& prevDestination) { }
+		//virtual void onDestination(const Ptr<Location>& prevDestination) { }
+		virtual void onDestination() { }
 
 		/* Notification that the 'length' of this segment has been modified */
 		virtual void onLength() { }
@@ -89,7 +91,8 @@ public:
 		if (source_ != source) {
 			const auto prevSource = source_;
 			source_ = source;
-			post(this, &Notifiee::onSource, prevSource);
+			//post(this, &Notifiee::onSource, prevSource);
+			post(this, &Notifiee::onSource);
 		}
 	}
 
@@ -98,7 +101,8 @@ public:
 		if (destination_ != destination) {
 			const auto prevDestination = destination_;
 			destination_ = destination;
-			post(this, &Notifiee::onDestination, prevDestination);
+			//post(this, &Notifiee::onDestination, prevDestination);
+			post(this, &Notifiee::onDestination);
 		}
 	}
 
