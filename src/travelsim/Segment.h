@@ -30,13 +30,13 @@ public:
 	}
 
 	Miles(const Ordinal<Length, int>& c) :
-		Ordinal(c.value()) 
+		Miles(c.value())
 	{
 		// Nothing else to do
 	}
 
 	Miles(const Miles& m):
-		Ordinal(m.value_)
+		Miles(m.value_)
 	{
 		// Nothing else to do
 	}	
@@ -107,6 +107,16 @@ public:
 			length_ = length;
 			post(this, &Notifiee::onLength);
 		}
+	}
+
+	/* Sets the source attribute to a default value */
+	void sourceDel() {
+		sourceIs(null);
+	}
+
+	/* Sets the destination attribute to a default value */
+	void destinationDel() {
+		destinationIs(null);
 	}
 
 	NotifieeList& notifiees() {

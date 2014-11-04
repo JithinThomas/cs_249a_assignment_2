@@ -104,9 +104,6 @@ public:
 		/* Notification that a new Car has been instantiated */
 		virtual void onCarNew(const Ptr<Car>& car) { }
 
-		/* Notification that a new Conn has been instantiated */
-		//virtual void onConnNew(const Ptr<Conn>& conn) { }
-
 		/* Notification that a Location has been deleted */
 		virtual void onLocationDel(const Ptr<Location>& location) { }
 
@@ -115,9 +112,6 @@ public:
 
 		/* Notification that a Vehicle has been deleted */
 		virtual void onVehicleDel(const Ptr<Vehicle>& vehicle) { }
-
-		/* Notification that a Conn has been deleted */
-		//virtual void onConnDel(const Ptr<Conn>& conn) { }
 	};
 
 	static Ptr<TravelManager> instanceNew(const string& name) {
@@ -126,35 +120,84 @@ public:
 
 protected:
 
+	typedef unordered_map< string, Ptr<Location> > LocationMap;
+	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
+	typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
+	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
+
+	typedef LocationMap::const_iterator locationConstIter;
+	typedef SegmentMap::const_iterator segmentConstIter;
+	typedef VehicleMap::const_iterator vehicleConstIter;
+
+	typedef LocationMap::iterator locationIterator;
+	typedef SegmentMap::iterator segmentIterator;
+	typedef VehicleMap::iterator vehicleIterator;
+
 	typedef std::list<Notifiee*> NotifieeList;
 
 public:
 
+	/* Location accessors by name */
 	Ptr<Location> location(const string& name) const {
-		const auto it = locationMap_.find(name);
-		if (it != locationMap_.end()) {
-			return it->second;
-		}
-
-		return null;
+		return getEntityFromMap<Location>(locationMap_, name);
 	}
 
+	Ptr<Airport> airport(const string& name) const {
+		return findLocationOfSpecificType<Airport>(name);
+	}
+
+	Ptr<Residence> residence(const string& name) const {
+		return findLocationOfSpecificType<Residence>(name);
+	}
+
+	/* Segment accessors by name */
 	Ptr<Segment> segment(const string& name) const {
-		const auto it = segmentMap_.find(name);
-		if (it != segmentMap_.end()) {
-			return it->second;
-		}
-
-		return null;
+		return getEntityFromMap<Segment>(segmentMap_, name);
 	}
 
-	Ptr<Vehicle> vehicle(const string& name) const {
-		const auto it = vehicleMap_.find(name);
-		if (it != vehicleMap_.end()) {
-			return it->second;
-		}
+	Ptr<Flight> flight(const string& name) const {
+		return findSegmentOfSpecificType<Flight>(name);
+	}
 
-		return null;
+	Ptr<Road> road(const string& name) const {
+		return findSegmentOfSpecificType<Road>(name);
+	}
+
+	/* Vehicle accessors by name */
+	Ptr<Vehicle> vehicle(const string& name) const {
+		return getEntityFromMap<Vehicle>(vehicleMap_, name);
+	}
+
+	Ptr<Airplane> airplane(const string& name) const {
+		return findVehicleOfSpecificType<Airplane>(name);
+	}
+
+	Ptr<Car> car(const string& name) const {
+		return findVehicleOfSpecificType<Car>(name);
+	}
+
+	locationConstIter locationIter() {
+		return locationMap_.cbegin();
+	}
+
+	locationConstIter locationIterEnd() {
+		return locationMap_.cend();
+	}
+
+	segmentConstIter segmentIter() {
+		return segmentMap_.cbegin();
+	}
+
+	segmentConstIter segmentIterEnd() {
+		return segmentMap_.cend();
+	}
+
+	vehicleConstIter vehicleIter() {
+		return vehicleMap_.cbegin();
+	}
+
+	vehicleConstIter vehicleIterEnd() {
+		return vehicleMap_.cend();
 	}
 
 	Ptr<Airport> airportNew(const string& name) {
@@ -245,6 +288,169 @@ public:
 		return car;
 	}
 
+	Ptr<Location> locationDel(const string& name) {
+		auto iter = locationMap_.find(name);
+		if (iter == locationMap_.end()) {
+			return null;
+		}
+
+		const auto location = iter->second;
+		locationDel(iter);
+		
+		return location;
+	}
+
+	locationIterator locationDel(locationConstIter iter) {
+		const auto location = iter->second;
+		auto next = locationMap_.erase(iter);
+
+		// Nullify the 'source' attribute of all segments for which this location was the source
+		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
+			location->sourceSegment(i)->sourceDel();
+		}
+
+		// Nullify the 'destintaion' attribute of all segments for which this location was the destination
+		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
+			location->destinationSegment(i)->destinationDel();
+		}
+
+		post(this, &Notifiee::onLocationDel, location);
+
+		return next;
+	}
+
+	segmentIterator segmentDel(segmentConstIter iter) {
+		const auto segment = iter->second;
+		auto next = segmentMap_.erase(iter);
+
+		post(this, &Notifiee::onSegmentDel, segment);
+
+		return next;
+	}
+
+	Ptr<Segment> segmentDel(const string& name) {
+		auto iter = segmentMap_.find(name);
+		if (iter == segmentMap_.end()) {
+			return null;
+		}
+
+		const auto segment = iter->second;
+		segmentDel(iter);
+
+		return segment;
+	}
+
+	vehicleIterator vehicleDel(vehicleConstIter iter) {
+		const auto vehicle = iter->second;
+		auto next = vehicleMap_.erase(iter);
+
+		post(this, &Notifiee::onVehicleDel, vehicle);
+
+		return next;
+	}
+
+	Ptr<Vehicle> vehicleDel(const string& name) {
+		auto iter = vehicleMap_.find(name);
+		if (iter == vehicleMap_.end()) {
+			return null;
+		}
+
+		const auto vehicle = iter->second;
+		vehicleDel(iter);
+
+		return vehicle;
+	}
+
+	NotifieeList& notifiees() {
+        return notifiees_;
+    }
+
+	TravelManager(const TravelManager&) = delete;
+
+	void operator =(const TravelManager&) = delete;
+	void operator ==(const TravelManager&) = delete;
+
+protected:
+
+	NotifieeList notifiees_;
+
+	explicit TravelManager(const string& name) :
+		NamedInterface(name)
+	{
+		// Nothing to do
+	}
+
+private:
+
+	bool isNameInUse(const string& name) {
+		return (isKeyPresent(locationMap_, name) ||
+				isKeyPresent(segmentMap_, name)  ||
+				isKeyPresent(vehicleMap_, name));
+	}
+
+	template<class T>
+	Ptr<T> findLocationOfSpecificType(const string& name) const {
+		Ptr<Location> loc = location(name);
+		if (loc != null) {
+			auto ptr = dynamic_cast<T*>(loc.ptr());
+			if (ptr != null) {
+				return ptr;
+			} 
+		}
+
+		return null;
+	}
+
+	template<class T>
+	Ptr<T> findSegmentOfSpecificType(const string& name) const {
+		Ptr<Segment> seg = segment(name);
+		if (seg != null) {
+			auto ptr = dynamic_cast<T*>(seg.ptr());
+			if (ptr != null) {
+				return ptr;
+			} 
+		}
+
+		return null;
+	}
+
+	template<class T>
+	Ptr<T> findVehicleOfSpecificType(const string& name) const {
+		Ptr<Vehicle> v = vehicle(name);
+		if (v != null) {
+			auto ptr = dynamic_cast<T*>(v.ptr());
+			if (ptr != null) {
+				return ptr;
+			} 
+		}
+
+		return null;
+	}
+
+	template<class T>
+	Ptr<T> getEntityFromMap(const unordered_map<string, Ptr<T>>& entityMap, const string& name) const {
+		const auto it = entityMap.find(name);
+		if (it != entityMap.end()) {
+			return it->second;
+		}
+
+		return null;
+	}
+
+	void addSegmentTracker(const Ptr<Segment>& segment) {
+		const auto segmentTracker = SegmentTracker::instanceNew();
+		segmentTracker->notifierIs(segment);
+		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(segment->name(), segmentTracker));
+	}
+
+	LocationMap locationMap_;
+	SegmentMap segmentMap_;
+	SegmentTrackerMap segmentTrackerMap_;
+	VehicleMap vehicleMap_;
+};
+
+
+
 	/*
 	Ptr<TravelManagerTracker> statsNew(const string& name) {
 		if (isNameInUse(name)) {
@@ -274,107 +480,5 @@ public:
 		return conn;
 	}
 	*/
-
-	Ptr<Location> locationDel(const string& name) {
-		auto iter = locationMap_.find(name);
-		if (iter == locationMap_.end()) {
-			return null;
-		}
-
-		const auto location = iter->second;
-		locationMap_.erase(iter);
-
-		// Nullify the 'source' attribute of all segments for which this location was the source
-		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
-			location->sourceSegment(i)->sourceIs(null);
-		}
-
-		// Nullify the 'destintaion' attribute of all segments for which this location was the destination
-		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
-			location->destinationSegment(i)->destinationIs(null);
-		}
-
-		post(this, &Notifiee::onLocationDel, location);
-
-		return location;
-	}
-
-	Ptr<Segment> segmentDel(const string& name) {
-		auto iter = segmentMap_.find(name);
-		if (iter == segmentMap_.end()) {
-			return null;
-		}
-
-		const auto segment = iter->second;
-		segmentMap_.erase(iter);
-
-		post(this, &Notifiee::onSegmentDel, segment);
-
-		return segment;
-	}
-
-	Ptr<Vehicle> vehicleDel(const string& name) {
-		auto iter = vehicleMap_.find(name);
-		if (iter == vehicleMap_.end()) {
-			return null;
-		}
-
-		const auto vehicle = iter->second;
-		vehicleMap_.erase(iter);
-
-		post(this, &Notifiee::onVehicleDel, vehicle);
-
-		return vehicle;
-	}
-
-	NotifieeList& notifiees() {
-        return notifiees_;
-    }
-
-	TravelManager(const TravelManager&) = delete;
-
-	void operator =(const TravelManager&) = delete;
-	void operator ==(const TravelManager&) = delete;
-
-protected:
-
-	//typedef unordered_map< string, Ptr<Conn> > ConnMap;
-	typedef unordered_map< string, Ptr<Location> > LocationMap;
-	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
-	typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
-	//typedef unordered_map< string, Ptr<TravelManagerTracker> > StatsMap;
-	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
-
-	NotifieeList notifiees_;
-
-	explicit TravelManager(const string& name) :
-		NamedInterface(name)
-	{
-		// Nothing to do
-	}
-
-private:
-
-	bool isNameInUse(const string& name) {
-		return (isKeyPresent(locationMap_, name) ||
-				isKeyPresent(segmentMap_, name)  ||
-				isKeyPresent(vehicleMap_, name));
-				//isKeyPresent(statsMap_, name) ||
-				//isKeyPresent(connMap_, name));
-	}
-
-	void addSegmentTracker(const Ptr<Segment>& segment) {
-		const auto segmentTracker = SegmentTracker::instanceNew();
-		segmentTracker->notifierIs(segment);
-		segmentTrackerMap_.insert(SegmentTrackerMap::value_type(segment->name(), segmentTracker));
-	}
-
-	//ConnMap connMap_;
-	LocationMap locationMap_;
-	SegmentMap segmentMap_;
-	SegmentTrackerMap segmentTrackerMap_;
-	//StatsMap statsMap_;
-	VehicleMap vehicleMap_;
-};
 
 #endif

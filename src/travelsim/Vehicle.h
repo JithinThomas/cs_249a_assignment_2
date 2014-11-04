@@ -24,13 +24,13 @@ public:
 	}
 
 	VehicleCapacity(const Ordinal<Capacity, int>& c) :
-		Ordinal(c.value()) 
+		VehicleCapacity(c.value()) 
 	{
 		// Nothing else to do
 	}
 
 	VehicleCapacity(const VehicleCapacity& c):
-		Ordinal(c.value_)
+		VehicleCapacity(c.value_)
 	{
 		// Nothing else to do
 	}	
@@ -49,13 +49,13 @@ public:
 	}
 
 	MilesPerHour(const Ordinal<Speed, int>& c) :
-		Ordinal(c.value()) 
+		MilesPerHour(c.value()) 
 	{
 		// Nothing else to do
 	}
 
 	MilesPerHour(const MilesPerHour& m):
-		Ordinal(m.value_)
+		MilesPerHour(m.value_)
 	{
 		// Nothing else to do
 	}	
@@ -77,13 +77,13 @@ public:
 	}
 
 	VehicleCost(const Ordinal<Vehicle, int>& c) :
-		Ordinal(c.value()) 
+		VehicleCost(c.value()) 
 	{
 		// Nothing else to do
 	}
 
 	VehicleCost(const VehicleCost& cost) :
-		Ordinal(cost.value_)
+		VehicleCost(cost.value_)
 	{
 		// Nothing else to do.
 	}

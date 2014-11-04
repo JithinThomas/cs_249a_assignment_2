@@ -43,7 +43,8 @@ protected:
 
 	typedef vector< Ptr<Segment> > SegmentVector;
 	typedef SegmentVector::const_iterator const_iterator;
-	typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
+	typedef SegmentVector::iterator iterator;
+	//typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
 	typedef std::list<Notifiee*> NotifieeList;
 
 public:
@@ -84,14 +85,14 @@ public:
 		return destinationSegments_.size();
 	}
 
-	void sourceSegmentIs(const Ptr<Segment>& segment) {
+	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
 		auto res = addSegment(sourceSegments_, segment);
 		if (res) {
 			post(this, &Notifiee::onSourceSegmentNew, segment);
 		}
 	}
 
-	void destinationSegmentIs(const Ptr<Segment>& segment) {
+	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
 		auto res = addSegment(destinationSegments_, segment);
 		if (res) {
 			post(this, &Notifiee::onDestinationSegmentNew, segment);
@@ -107,6 +108,15 @@ public:
 		return seg;
 	}
 
+	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
+		auto seg = *iter;
+		auto next = sourceSegments_.erase(iter);
+
+		post(this, &Notifiee::onSourceSegmentDel, seg);
+
+		return next;
+	}
+
 	Ptr<Segment> destinationSegmentDel(const Ptr<Segment>& segment) {
 		auto seg = deleteSegment( destinationSegments_, segment);
 		if (seg != null) {
@@ -114,6 +124,15 @@ public:
 		}
 
 		return seg;
+	}
+
+	iterator destinationSegmentDel(SegmentVector::const_iterator iter) {
+		auto seg = *iter;
+		auto next = destinationSegments_.erase(iter);
+
+		post(this, &Notifiee::onDestinationSegmentDel, seg);
+		
+		return next;
 	}
 
 	NotifieeList& notifiees() {
@@ -202,6 +221,24 @@ public:
 	/* Return a new Residence instance with the given name */
 	static Ptr<Residence> instanceNew(const string& name) {
 		return new Residence(name);
+	}
+
+	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
+		if (dynamic_cast<Road*>(segment.ptr()) != null) {
+			Location::sourceSegmentIs(segment);
+			return;
+		}
+
+		logError(WARNING, "A Residence can be the source of only Road segments. Given segment ('" + segment->name() + "') is not a Road.");
+	}
+
+	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
+		if (dynamic_cast<Road*>(segment.ptr()) != null) {
+			Location::destinationSegmentIs(segment);
+			return;
+		}
+
+		logError(WARNING, "A Residence can be the destination of only Road segments. Given segment ('" + segment->name() + "') is not a Road.");
 	}
 
 protected:
