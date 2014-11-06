@@ -559,7 +559,7 @@ public:
 		} else if (isAirport(location)) {
 			airportCount_--;
 		} else {
-			logError(WARNING, "onLocationDel: Unexpected type of location.");
+			logError(WARNING, "onLocationDel: Unexpected type of Location.");
 		}
 
 		locationCount_--;
@@ -570,6 +570,8 @@ public:
 			flightCount_--;
 		} else if (isRoad(segment)) {
 			roadCount_--;
+		} else {
+			logError(WARNING, "onSegmentDel: Unexpected type of Segment.");
 		}
 
 		segmentCount_--;
@@ -580,6 +582,8 @@ public:
 			airplaneCount_--;
 		} else if (isCar(vehicle)) {
 			carCount_--;
+		} else {
+			logError(WARNING, "onVehicleDel: Unexpected type of Vehicle.");
 		}
 
 		vehicleCount_--;
