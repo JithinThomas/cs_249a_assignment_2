@@ -18,68 +18,66 @@ using fwk::PtrInterface;
 using std::set;
 using std::to_string;
 
-class Path : public PtrInterface {
-public:
-
-	static Ptr<Path> instanceNew() {
-		return new Path();
-	}
-
-	static Ptr<Path> instanceNew(const Ptr<Path>& p) {
-		return new Path(p);
-	}
-
-	void segmentIs(const Ptr<Segment> segment) {
-		segments_.push_back(segment);
-		length_ = length_ + segment->length();
-	}
-
-	vector< Ptr<Segment> > segments() const {
-		return segments_;
-	}
-
-	Miles length() const {
-		return length_;
-	}
-
-	string toString() const {
-		string str = "";
-		auto segmentCount = segments_.size();
-		for (auto i = 0; i < segmentCount; i++) {
-			auto seg = segments_[i];
-			str += seg->source()->name() + "(" + seg->name() + ":" + to_string(seg->length().value()) + ") ";
-		}
-
-		if (segmentCount > 0) {
-			str += segments_[segmentCount - 1]->destination()->name();
-		}
-
-		return str;
-	}
-
-protected:
-
-	Path():
-		length_(0)
-	{
-		// Nothing else to do
-	}
-
-	Path(const Ptr<Path>& p) :
-		segments_(p->segments()),
-		length_(p->length())
-	{
-		// Nothing else to do
-	}
-
-private:
-
-	vector< Ptr<Segment> > segments_;
-	Miles length_;
-};
 
 class Conn : public NamedInterface {
 public:
+
+	class Path : public PtrInterface {
+	public:
+
+		static Ptr<Path> instanceNew() {
+			return new Path();
+		}
+
+		static Ptr<Path> instanceNew(const Ptr<Path>& p) {
+			return new Path(p);
+		}
+
+		void segmentIs(const Ptr<Segment> segment) {
+			segments_.push_back(segment);
+			length_ = length_ + segment->length();
+		}
+
+		Ptr<Segment> segment(const U32 id) {
+			if (id < segments_.size()) {
+				return segments_[id];
+			}
+
+			return null;
+		}
+
+		vector< Ptr<Segment> > segments() const {
+			return segments_;
+		}
+
+		unsigned int segmentCount() const {
+			return segments_.size();
+		}
+
+		Miles length() const {
+			return length_;
+		}
+
+	protected:
+
+		Path():
+			length_(0)
+		{
+			// Nothing else to do
+		}
+
+		Path(const Ptr<Path>& p) :
+			segments_(p->segments()),
+			length_(p->length())
+		{
+			// Nothing else to do
+		}
+
+	private:
+
+		vector< Ptr<Segment> > segments_;
+		Miles length_;
+	};
 
 	static Ptr<Conn> instanceNew(const string& name) {
 		return new Conn(name);

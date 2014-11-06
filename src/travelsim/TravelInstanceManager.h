@@ -285,7 +285,8 @@ protected:
             auto paths = conn_->paths(location, Miles(maxLength));
             string allPathsStr = "";
             for (auto p : paths) {
-                allPathsStr += p->toString() + "\n";
+                //allPathsStr += p->toString() + "\n";
+                allPathsStr += toString(p) + "\n";
             }
 
             return allPathsStr;
@@ -315,6 +316,22 @@ protected:
     private:
 
         friend class TravelInstanceManager;
+
+        string toString(const Ptr<Conn::Path>& p) const {
+            string str = "";
+            auto segments = p->segments();
+            for (auto it = segments.cbegin(); it != segments.cend(); it++) {
+                auto seg = *it;
+                str += seg->source()->name() + "(" + seg->name() + ":" + to_string(seg->length().value()) + ") ";
+            }
+
+            auto lastSegment = p->segment(p->segmentCount() - 1);
+            if (lastSegment != null) {
+                str += lastSegment->destination()->name();
+            }
+
+            return str;
+        }
 
         Ptr<Conn> conn_;
 
