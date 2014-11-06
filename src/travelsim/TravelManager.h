@@ -28,6 +28,22 @@ bool isKeyPresent(unordered_map<K,V> map, K key) {
 	return (map.find(key) != map.end());
 }
 
+bool isFlight(const Ptr<Segment>& segment) {
+	return isInstanceOf<Segment, Flight>(segment);
+}
+
+bool isRoad(const Ptr<Segment>& segment) {
+	return isInstanceOf<Segment, Road>(segment);
+}
+
+bool isAirplane(const Ptr<Vehicle>& vehicle) {
+	return isInstanceOf<Vehicle, Airplane>(vehicle);
+}
+
+bool isCar(const Ptr<Vehicle>& vehicle) {
+	return isInstanceOf<Vehicle, Car>(vehicle);
+}
+
 //=======================================================
 
 //=======================================================
@@ -471,6 +487,18 @@ public:
 		return new TravelManagerTracker(name);
 	}
 
+	unsigned int locationCount() const {
+		return locationCount_;
+	}
+
+	unsigned int segmentCount() const {
+		return segmentCount_;
+	}
+
+	unsigned int vehicleCount() const {
+		return vehicleCount_;
+	}
+
 	unsigned int residenceCount() const {
 		return residenceCount_;
 	}
@@ -497,26 +525,64 @@ public:
 
 	void onResidenceNew(const Ptr<Residence>& residence) {
 		residenceCount_++;
+		locationCount_++;
 	}
 
 	void onAirportNew(const Ptr<Airport>& airport) {
 		airportCount_++;
+		locationCount_++;
 	}
 
 	void onFlightNew(const Ptr<Flight>& flight) {
 		flightCount_++;
+		segmentCount_++;
 	}
 
 	void onRoadNew(const Ptr<Road>& road) {
 		roadCount_++;
+		segmentCount_++;
 	}
 
 	void onAirplaneNew(const Ptr<Airplane>& airplane) {
 		airplaneCount_++;
+		vehicleCount_++;
 	}
 
 	void onCarNew(const Ptr<Car>& car) {
 		carCount_++;
+		vehicleCount_++;
+	}
+
+	void onLocationDel(const Ptr<Location>& location) {
+		if (isResidence(location)) {
+			residenceCount_--;
+		} else if (isAirport(location)) {
+			airportCount_--;
+		} else {
+			logError(WARNING, "onLocationDel: Unexpected type of location.");
+		}
+
+		locationCount_--;
+	}
+
+	void onSegmentDel(const Ptr<Segment>& segment) {
+		if (isFlight(segment)) {
+			flightCount_--;
+		} else if (isRoad(segment)) {
+			roadCount_--;
+		}
+
+		segmentCount_--;
+	}
+
+	void onVehicleDel(const Ptr<Vehicle>& vehicle) {
+		if (isAirplane(vehicle)) {
+			airplaneCount_--;
+		} else if (isCar(vehicle)) {
+			carCount_--;
+		}
+
+		vehicleCount_--;
 	}
 
 	const string& name() const {
@@ -530,8 +596,11 @@ protected:
 		airportCount_(0),
 		carCount_(0),
 		flightCount_(0),
+		locationCount_(0),
 		residenceCount_(0),
 		roadCount_(0),
+		segmentCount_(0),
+		vehicleCount_(0),
 		name_(name)
 	{
 
@@ -542,8 +611,11 @@ private:
 	unsigned int airportCount_;
 	unsigned int carCount_;
 	unsigned int flightCount_;
+	unsigned int locationCount_;
 	unsigned int residenceCount_;
 	unsigned int roadCount_;
+	unsigned int segmentCount_;
+	unsigned int vehicleCount_;
 
 	string name_;
 };

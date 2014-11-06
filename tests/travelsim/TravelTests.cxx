@@ -298,12 +298,82 @@ TEST(Stats, onLocation) {
 	ASSERT_EQ(stats->airportCount(), 0);
 	ASSERT_EQ(stats->residenceCount(), 2);
 
-	manager->airportNew(names[0]);
-	manager->residenceNew(names[3]);
+	manager->locationDel(names[0]);
+	manager->locationDel(names[3]);
 
-	ASSERT_EQ(stats->locationCount(), 4);
-	ASSERT_EQ(stats->airportCount(), 1);
-	ASSERT_EQ(stats->residenceCount(), 3);
+	ASSERT_EQ(stats->locationCount(), 2);
+	ASSERT_EQ(stats->airportCount(), 0);
+	ASSERT_EQ(stats->residenceCount(), 2);
+}
+
+TEST(Stats, onSegment) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto stats = manager->stats();
+	vector<string> names { "segment1", "segment2", "segment3", "segment4", "segment5" };
+
+	ASSERT_EQ(stats->segmentCount(), 0);
+	ASSERT_EQ(stats->flightCount(), 0);
+	ASSERT_EQ(stats->roadCount(), 0);
+
+	manager->roadNew(names[0]);
+	manager->flightNew(names[1]);
+	manager->roadNew(names[2]);
+	manager->flightNew(names[3]);
+	manager->roadNew(names[4]);
+
+	ASSERT_EQ(stats->segmentCount(), 5);
+	ASSERT_EQ(stats->flightCount(), 2);
+	ASSERT_EQ(stats->roadCount(), 3);
+
+	manager->segmentDel(names[2]);
+	manager->segmentDel(names[1]);
+	manager->segmentDel(names[4]);
+
+	ASSERT_EQ(stats->segmentCount(), 2);
+	ASSERT_EQ(stats->flightCount(), 1);
+	ASSERT_EQ(stats->roadCount(), 1);
+
+	manager->segmentDel(names[1]);
+	manager->segmentDel(names[4]);
+
+	ASSERT_EQ(stats->segmentCount(), 2);
+	ASSERT_EQ(stats->flightCount(), 1);
+	ASSERT_EQ(stats->roadCount(), 1);
+}
+
+TEST(Stats, onVehicle) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto stats = manager->stats();
+	vector<string> names { "vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5" };
+
+	ASSERT_EQ(stats->vehicleCount(), 0);
+	ASSERT_EQ(stats->airplaneCount(), 0);
+	ASSERT_EQ(stats->carCount(), 0);
+
+	manager->carNew(names[0]);
+	manager->airplaneNew(names[1]);
+	manager->carNew(names[2]);
+	manager->airplaneNew(names[3]);
+	manager->carNew(names[4]);
+
+	ASSERT_EQ(stats->vehicleCount(), 5);
+	ASSERT_EQ(stats->airplaneCount(), 2);
+	ASSERT_EQ(stats->carCount(), 3);
+
+	manager->vehicleDel(names[1]);
+	manager->vehicleDel(names[2]);
+	manager->vehicleDel(names[4]);
+
+	ASSERT_EQ(stats->vehicleCount(), 2);
+	ASSERT_EQ(stats->airplaneCount(), 1);
+	ASSERT_EQ(stats->carCount(), 1);
+
+	manager->vehicleDel(names[2]);
+	manager->vehicleDel(names[4]);
+
+	ASSERT_EQ(stats->vehicleCount(), 2);
+	ASSERT_EQ(stats->airplaneCount(), 1);
+	ASSERT_EQ(stats->carCount(), 1);
 }
 
 TEST(LocationAndSegment, segmentSourceAndDestChanges) {
