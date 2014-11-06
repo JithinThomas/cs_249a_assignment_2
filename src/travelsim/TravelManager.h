@@ -4,11 +4,11 @@
 
 #include "CommonLib.h"
 #include "Conn.h"
-#include "Flight.h"
-#include "Location.h"
 #include "Segment.h"
+#include "Location.h"
+#include "SegmentImpl.h"
+#include "Flight.h"
 #include "Vehicle.h"
-//#include "TravelManagerTracker.h"
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
@@ -46,43 +46,6 @@ bool isCar(const Ptr<Vehicle>& vehicle) {
 
 //=======================================================
 
-//=======================================================
-// SegmentTracker class
-//=======================================================
-
-class TravelManager;
-class SegmentTracker : public Segment::Notifiee {
-public:
-
-	virtual void onSource() { 
-		if (prevSource_ != null) {
-			prevSource_->sourceSegmentDel(notifier());
-		}
-
-		auto currSource = notifier()->source();
-		currSource->sourceSegmentIs(notifier());
-
-		prevSource_ = currSource;
-	}
-
-	virtual void onDestination() { 
-		if (prevDestination_ != null) {
-			prevDestination_->destinationSegmentDel(notifier());
-		}
-
-		auto currDestination = notifier()->destination();
-		currDestination->destinationSegmentIs(notifier());
-
-		prevDestination_ = currDestination;
-	}
-
-private:
-
-	Ptr<Location> prevSource_;
-	Ptr<Location> prevDestination_;
-};
-
-//=======================================================
 
 //=======================================================
 // TravelManager class
@@ -139,7 +102,6 @@ protected:
 
 	typedef unordered_map< string, Ptr<Location> > LocationMap;
 	typedef unordered_map< string, Ptr<Segment> > SegmentMap;
-	//typedef unordered_map< string, Ptr<SegmentTracker> > SegmentTrackerMap;
 	typedef unordered_map< string, Ptr<Vehicle> > VehicleMap;
 
 	typedef LocationMap::const_iterator locationConstIter;
@@ -261,8 +223,6 @@ public:
 
 		const auto flight = Flight::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, flight));
-		
-		addSegmentTracker(flight);
 
 		post(this, &Notifiee::onFlightNew, flight);
 
@@ -277,8 +237,6 @@ public:
 
 		const auto road = Road::instanceNew(name);
 		segmentMap_.insert(SegmentMap::value_type(name, road));
-
-		addSegmentTracker(road);
 
 		post(this, &Notifiee::onRoadNew, road);
 
@@ -347,10 +305,6 @@ public:
 	segmentIterator segmentDel(segmentConstIter iter) {
 		const auto segment = iter->second;
 		auto next = segmentMap_.erase(iter);
-
-		auto segmentTracker = segmentToTracker_[segment->name()];
-		delete segmentTracker;
-		segmentToTracker_.erase(segment->name());
 
 		post(this, &Notifiee::onSegmentDel, segment);
 
@@ -462,15 +416,8 @@ private:
 		return null;
 	}
 
-	void addSegmentTracker(const Ptr<Segment>& segment) {
-		const auto segmentTracker = new SegmentTracker();
-		segmentTracker->notifierIs(segment);
-		segmentToTracker_[segment->name()] = segmentTracker;
-	}
-
 	LocationMap locationMap_;
 	SegmentMap segmentMap_;
-	unordered_map<string, SegmentTracker*> segmentToTracker_;
 	VehicleMap vehicleMap_;
 	Ptr<Conn> conn_;
 	Ptr<TravelManagerTracker> stats_;

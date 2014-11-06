@@ -86,26 +86,6 @@ public:
 		return length_;
 	}
 
-	// TODO: Should the return type be Ptr<Location>
-	virtual void sourceIs(const Ptr<Location>& source) {
-		if (source_ != source) {
-			const auto prevSource = source_;
-			source_ = source;
-			//post(this, &Notifiee::onSource, prevSource);
-			post(this, &Notifiee::onSource);
-		}
-	}
-
-	// TODO: Should the return type be Ptr<Location>
-	virtual void destinationIs(const Ptr<Location>& destination) {
-		if (destination_ != destination) {
-			const auto prevDestination = destination_;
-			destination_ = destination;
-			//post(this, &Notifiee::onDestination, prevDestination);
-			post(this, &Notifiee::onDestination);
-		}
-	}
-
 	void lengthIs(const Miles& length) {
 		if (length_ != length) {
 			length_ = length;
@@ -126,6 +106,9 @@ public:
 	NotifieeList& notifiees() {
         return notifiees_;
     }
+
+    virtual void sourceIs(const Ptr<Location>& source);
+	virtual void destinationIs(const Ptr<Location>& destination);
 
 	Segment(const Segment&) = delete;
 
