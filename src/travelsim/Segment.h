@@ -10,12 +10,7 @@ using fwk::NotifierLib::post;
 using fwk::Ordinal;
 using fwk::Ptr;
 
-class Segment;
-class Location;
-class Airport;
-class Residence;
 
-//typedef Ordinal< Segment, unsigned int > SegmentLength;
 
 class Length {};
 class Miles : public Ordinal<Length, int> {
@@ -44,6 +39,8 @@ public:
 
 // ==================================================
 
+class Location;
+
 class Segment : public NamedInterface {
 public:
 
@@ -54,11 +51,9 @@ public:
 		}
 
 		/* Notification that the 'source' of this segment has been modified */
-		//virtual void onSource(const Ptr<Location>& prevSource) { }
 		virtual void onSource() { }
 
 		/* Notification that the 'destination' of this segment has been modified */
-		//virtual void onDestination(const Ptr<Location>& prevDestination) { }
 		virtual void onDestination() { }
 
 		/* Notification that the 'length' of this segment has been modified */
