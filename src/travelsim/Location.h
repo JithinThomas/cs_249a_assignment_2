@@ -129,11 +129,12 @@ protected:
 		return seg;
 	}
 
-	iterator sourceSegmentDel(SegmentVector::iterator iter) {
+	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
 		auto seg = *iter;
 		seg->sourceDel();
 
-		auto next = sourceSegments_.erase(iter);
+		auto it = std::find(sourceSegments_.begin(), sourceSegments_.end(), seg);
+		auto next = sourceSegments_.erase(it);
 
 		post(this, &Notifiee::onSourceSegmentDel, seg);
 
@@ -156,11 +157,12 @@ protected:
 		return seg;
 	}
 
-	iterator destinationSegmentDel(SegmentVector::iterator iter) {
+	iterator destinationSegmentDel(SegmentVector::const_iterator iter) {
 		auto seg = *iter;
 		seg->destinationDel();
 
-		auto next = destinationSegments_.erase(iter);
+		auto it = std::find(destinationSegments_.begin(), destinationSegments_.end(), seg);
+		auto next = destinationSegments_.erase(it);
 
 		post(this, &Notifiee::onDestinationSegmentDel, seg);
 		
