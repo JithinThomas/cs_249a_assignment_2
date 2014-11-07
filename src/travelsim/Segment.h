@@ -12,28 +12,45 @@ using fwk::Ptr;
 
 
 class Length {};
-class Miles : public Ordinal<Length, int> {
+
+class Miles : public Ordinal<Length, double> {
 public:
 
-	Miles(const int value = 0) :
+	static constexpr double tolerance = 1e-4;
+
+	Miles(const double value = 0) :
 		Ordinal(value)
 	{
 		if (value < 0) {
-			throw fwk::RangeException("Miles cannot be negative ('" + std::to_string(value) + "')");
+			throw fwk::RangeException("Miles cannot be negative");
 		}
 	}
 
-	Miles(const Ordinal<Length, int>& c) :
-		Miles(c.value())
+	Miles(const Ordinal<Length, double>& m) :
+		Miles(m.value()) 
 	{
 		// Nothing else to do
 	}
 
-	Miles(const Miles& m):
+	Miles(const Miles& m) :
 		Miles(m.value_)
 	{
-		// Nothing else to do
-	}	
+		// Nothing else to do.
+	}
+
+	double value() const {
+		return value_;
+	}
+
+	/** Test for equality using a builtin tolerance. */
+	virtual bool operator ==(const Miles& m) {
+		return (value_ < m.value_ + tolerance) && (value_ > m.value_ - tolerance);
+	}
+
+	/** Test for inequality using a builtin tolerance. */
+    virtual bool operator !=(const Miles& m) const {
+        return (value_ >= m.value_ + tolerance) || (value_ <= m.value_ - tolerance);
+    }
 };
 
 // ==================================================

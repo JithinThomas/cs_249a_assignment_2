@@ -11,26 +11,26 @@ using fwk::NotifierLib::post;
 using fwk::Ptr;
 
 class Capacity {};
-class VehicleCapacity : public Ordinal<Capacity, int> {
+class PassengerCount : public Ordinal<Capacity, int> {
 public:
 
 	// TODO: Is there a better way than defining these 3 constructors?
-	VehicleCapacity(const int value = 0) :
+	PassengerCount(const int value = 0) :
 		Ordinal(value)
 	{
 		if (value < 0) {
-			throw fwk::RangeException("VehicleCapacity cannot be negative ('" + std::to_string(value) + "')");
+			throw fwk::RangeException("PassengerCount cannot be negative ('" + std::to_string(value) + "')");
 		}
 	}
 
-	VehicleCapacity(const Ordinal<Capacity, int>& c) :
-		VehicleCapacity(c.value()) 
+	PassengerCount(const Ordinal<Capacity, int>& c) :
+		PassengerCount(c.value()) 
 	{
 		// Nothing else to do
 	}
 
-	VehicleCapacity(const VehicleCapacity& c):
-		VehicleCapacity(c.value_)
+	PassengerCount(const PassengerCount& c):
+		PassengerCount(c.value_)
 	{
 		// Nothing else to do
 	}	
@@ -62,28 +62,27 @@ public:
 };
 
 class Vehicle;
-
-class VehicleCost : public Ordinal<Vehicle, double> {
+class DollarsPerMile : public Ordinal<Vehicle, double> {
 public:
 
 	static constexpr double tolerance = 1e-4;
 
-	VehicleCost(const double value = 0) :
+	DollarsPerMile(const double value = 0) :
 		Ordinal(value)
 	{
 		if (value < 0) {
-			throw fwk::RangeException("VehicleCost cannot be negative");
+			throw fwk::RangeException("DollarsPerMile cannot be negative");
 		}
 	}
 
-	VehicleCost(const Ordinal<Vehicle, int>& c) :
-		VehicleCost(c.value()) 
+	DollarsPerMile(const Ordinal<Vehicle, int>& c) :
+		DollarsPerMile(c.value()) 
 	{
 		// Nothing else to do
 	}
 
-	VehicleCost(const VehicleCost& cost) :
-		VehicleCost(cost.value_)
+	DollarsPerMile(const DollarsPerMile& cost) :
+		DollarsPerMile(cost.value_)
 	{
 		// Nothing else to do.
 	}
@@ -92,21 +91,13 @@ public:
 		return value_;
 	}
 
-	void valueIs(const double value) {
-		value_ = value;
-	}
-
-	void valueIs(const VehicleCost& cost) {
-		value_ = cost.value_;
-	}
-
 	/** Test for equality using a builtin tolerance. */
-	virtual bool operator ==(const VehicleCost& cost) {
+	virtual bool operator ==(const DollarsPerMile& cost) {
 		return (value_ < cost.value_ + tolerance) && (value_ > cost.value_ - tolerance);
 	}
 
 	/** Test for inequality using a builtin tolerance. */
-    virtual bool operator !=(const VehicleCost& cost) const {
+    virtual bool operator !=(const DollarsPerMile& cost) const {
         return (value_ >= cost.value_ + tolerance) || (value_ <= cost.value_ - tolerance);
     }
 };
@@ -140,7 +131,7 @@ protected:
 
 public:
 
-	VehicleCapacity capacity() const {
+	PassengerCount capacity() const {
 		return capacity_;
 	}
 
@@ -148,11 +139,11 @@ public:
 		return speed_;
 	}
 
-	VehicleCost cost() const {
+	DollarsPerMile cost() const {
 		return cost_;
 	}
 
-	void capacityIs(const VehicleCapacity& capacity) {
+	void capacityIs(const PassengerCount& capacity) {
 		if (capacity_ != capacity) {
 			capacity_ = capacity;
 			post(this, &Notifiee::onCapacity);
@@ -166,7 +157,7 @@ public:
 		}
 	}
 
-	void costIs(const VehicleCost& cost) {
+	void costIs(const DollarsPerMile& cost) {
 		if (cost_ != cost) {
 			cost_ = cost;
 			post(this, &Notifiee::onCost);
@@ -184,9 +175,9 @@ public:
 
 protected:
 
-	static const VehicleCapacity defaultCapacity;
+	static const PassengerCount defaultCapacity;
 	static const MilesPerHour defaultSpeed;
-	static const VehicleCost defaultCost;
+	static const DollarsPerMile defaultCost;
 
 	NotifieeList notifiees_;
 
@@ -200,9 +191,9 @@ protected:
 	}
 
 	Vehicle(const string& name,
-			const VehicleCapacity& capacity,
+			const PassengerCount& capacity,
 			const MilesPerHour& speed,
-			const VehicleCost& cost) :
+			const DollarsPerMile& cost) :
 		NamedInterface(name),
 		capacity_(capacity),
 		speed_(speed),
@@ -214,13 +205,13 @@ protected:
 	~Vehicle() {}
 
 private:
-	VehicleCapacity capacity_;
+	PassengerCount capacity_;
 	MilesPerHour speed_;
-	VehicleCost cost_;
+	DollarsPerMile cost_;
 };
 
-const VehicleCapacity Vehicle::defaultCapacity = VehicleCapacity(0);
-const VehicleCost Vehicle::defaultCost = VehicleCost(0);
+const PassengerCount Vehicle::defaultCapacity = PassengerCount(0);
+const DollarsPerMile Vehicle::defaultCost = DollarsPerMile(0);
 const MilesPerHour Vehicle::defaultSpeed = MilesPerHour(0);
 
 class Airplane : public Vehicle {
@@ -238,9 +229,9 @@ protected:
 	}
 
 	Airplane(const string& name,
-			 const VehicleCapacity& capacity,
+			 const PassengerCount& capacity,
 			 const MilesPerHour& speed,
-			 const VehicleCost& cost) :
+			 const DollarsPerMile& cost) :
 		Vehicle(name, capacity, speed, cost)
 	{
 		// Nothing to do
@@ -262,9 +253,9 @@ protected:
 	}
 
 	Car(const string& name,
-		const VehicleCapacity& capacity,
+		const PassengerCount& capacity,
 		const MilesPerHour& speed,
-		const VehicleCost& cost) :
+		const DollarsPerMile& cost) :
 		Vehicle(name, capacity, speed, cost)
 	{
 		// Nothing to do

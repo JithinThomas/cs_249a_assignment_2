@@ -119,22 +119,26 @@ private:
 							  ) const {
 		PathVector validPaths;
 
-		for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
-			auto segment = location->sourceSegment(i);
-			Miles totalLengthOfPath = pathFromStartLocation->length() + segment->length();
-			auto destination = segment->destination();
+		if (location != null) {
+			for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
+				auto segment = location->sourceSegment(i);
+				Miles totalLengthOfPath = pathFromStartLocation->length() + segment->length();
+				auto destination = segment->destination();
 
-			if ((totalLengthOfPath <= maxLength) && (locationsVisited.find(destination->name()) == locationsVisited.end())) {
-				auto p = Path::instanceNew(pathFromStartLocation);
-				p->segmentIs(segment);
-				validPaths.push_back(p);
+				if ((totalLengthOfPath <= maxLength) && 
+					(destination != null) &&
+					(locationsVisited.find(destination->name()) == locationsVisited.end())) {
+						auto p = Path::instanceNew(pathFromStartLocation);
+						p->segmentIs(segment);
+						validPaths.push_back(p);
 
-				locationsVisited.insert(destination->name());
-				auto otherPaths = getPathsFromLoc(destination, p, maxLength, locationsVisited);
-				locationsVisited.erase(destination->name());
+						locationsVisited.insert(destination->name());
+						auto otherPaths = getPathsFromLoc(destination, p, maxLength, locationsVisited);
+						locationsVisited.erase(destination->name());
 
-				for (auto p : otherPaths) {
-					validPaths.push_back(p);
+						for (auto p : otherPaths) {
+							validPaths.push_back(p);
+						}
 				}
 			}
 		}
