@@ -44,7 +44,7 @@ void logError(ErrorLevel errorLevel, const string& err) {
 }
 
 bool isNumber(const string& str) {
-    for (auto i = 0; i < str.length(); i++) {
+    for (auto i = 0u; i < str.length(); i++) {
         if (!isdigit(str[i])) {
             return false;
         }

@@ -120,7 +120,7 @@ private:
 		PathVector validPaths;
 
 		if (location != null) {
-			for (auto i = 0; i < location->sourceSegmentCount(); i++) {		
+			for (auto i = 0u; i < location->sourceSegmentCount(); i++) {		
 				auto segment = location->sourceSegment(i);
 				Miles totalLengthOfPath = pathFromStartLocation->length() + segment->length();
 				auto destination = segment->destination();

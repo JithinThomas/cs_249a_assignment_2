@@ -129,7 +129,7 @@ protected:
 		return seg;
 	}
 
-	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
+	iterator sourceSegmentDel(SegmentVector::iterator iter) {
 		auto seg = *iter;
 		seg->sourceDel();
 
@@ -156,7 +156,7 @@ protected:
 		return seg;
 	}
 
-	iterator destinationSegmentDel(SegmentVector::const_iterator iter) {
+	iterator destinationSegmentDel(SegmentVector::iterator iter) {
 		auto seg = *iter;
 		seg->destinationDel();
 
