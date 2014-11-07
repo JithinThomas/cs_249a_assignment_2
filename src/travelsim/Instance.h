@@ -2,7 +2,7 @@
 #define TRAVELSIM_INSTANCE_H
 
 #include "fwk/fwk.h"
-#include "TravelManager.h"
+#include "TravelNetworkManager.h"
 
 /**
  * Instance provides the external interface to entities in our simulation.
@@ -31,11 +31,11 @@ public:
 
 protected:
 
-    Ptr<TravelManager> travelManager() const {
+    Ptr<TravelNetworkManager> travelManager() const {
         return travelManager_;
     }
 
-    void travelManagerIs(const Ptr<TravelManager>& travelManager) {
+    void travelManagerIs(const Ptr<TravelNetworkManager>& travelManager) {
         travelManager_ = travelManager;
     }
 
@@ -43,7 +43,7 @@ protected:
         // Nothing else to do.
     }
 
-    Ptr<TravelManager> travelManager_;  
+    Ptr<TravelNetworkManager> travelManager_;  
 
 };
 

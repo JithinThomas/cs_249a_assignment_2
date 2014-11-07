@@ -174,7 +174,7 @@ protected:
 	}
 
 	friend class Segment;
-	friend class TravelManager;
+	friend class TravelNetworkManager;
 
 	NotifieeList notifiees_;
 

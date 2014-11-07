@@ -1,18 +1,18 @@
 #include "gtest/gtest.h"
 #include "fwk/fwk.h"
-#include "TravelManager.h"
+#include "TravelNetworkManager.h"
 #include "Conn.h"
 
 using std::to_string;
 
-TEST(TravelManager, instanceNew) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, instanceNew) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	ASSERT_TRUE(manager != null);
 	ASSERT_TRUE(manager->name() == "manager-1");
 }
 
-TEST(TravelManager, locationNew) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, locationNew) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto residence1 = "location-1";
 	const auto airport1 = "location-2";
 
@@ -42,8 +42,8 @@ TEST(TravelManager, locationNew) {
 	ASSERT_TRUE(res2->name() == residence1);
 }
 
-TEST(TravelManager, segmentNew) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, segmentNew) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto flight1 = "segment-1";
 	const auto road1 = "segment-2";
 
@@ -73,8 +73,8 @@ TEST(TravelManager, segmentNew) {
 	ASSERT_TRUE(res2->name() == road1);
 }
 
-TEST(TravelManager, vehicleNew) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, vehicleNew) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto car1 = "vehicle-1";
 	const auto airplane1 = "vehicle-2";
 
@@ -104,8 +104,8 @@ TEST(TravelManager, vehicleNew) {
 	ASSERT_TRUE(res2->name() == airplane1);
 }
 
-TEST(TravelManager, locationIter) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, locationIter) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "location1", "location2", "location3", "location4" };
 
 	manager->airportNew(names[0]);
@@ -124,8 +124,8 @@ TEST(TravelManager, locationIter) {
 	ASSERT_EQ(names.size(), 0);
 }
 
-TEST(TravelManager, segmentIter) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, segmentIter) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "segment1", "segment2", "segment3", "segment4" };
 
 	manager->flightNew(names[0]);
@@ -144,8 +144,8 @@ TEST(TravelManager, segmentIter) {
 	ASSERT_EQ(names.size(), 0);
 }
 
-TEST(TravelManager, vehicleIter) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, vehicleIter) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "segment1", "segment2", "segment3", "segment4" };
 
 	manager->carNew(names[0]);
@@ -164,8 +164,8 @@ TEST(TravelManager, vehicleIter) {
 	ASSERT_EQ(names.size(), 0);
 }
 
-TEST(TravelManager, locationDel) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, locationDel) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "location1", "location2", "location3", "location4" };
 
 	const auto loc0 = manager->airportNew(names[0]);
@@ -198,8 +198,8 @@ TEST(TravelManager, locationDel) {
 	ASSERT_TRUE(manager->location(names[3]) == loc3);
 }
 
-TEST(TravelManager, segmentDel) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, segmentDel) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "segment1", "segment2", "segment3", "segment4" };
 
 	const auto seg0 = manager->roadNew(names[0]);
@@ -232,8 +232,8 @@ TEST(TravelManager, segmentDel) {
 	ASSERT_TRUE(manager->segment(names[3]) == seg3);
 }
 
-TEST(TravelManager, vehicleDel) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, vehicleDel) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> names { "vehicle1", "vehicle2", "vehicle3", "vehicle4" };
 
 	const auto v0 = manager->carNew(names[0]);
@@ -266,8 +266,8 @@ TEST(TravelManager, vehicleDel) {
 	ASSERT_TRUE(manager->vehicle(names[3]) == v3);
 }
 
-TEST(TravelManager, locationDel_Update_Segment_SrcAndDst) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, locationDel_Update_Segment_SrcAndDst) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> locationNames { "location0", "location1", "location2" };
 	vector<string> segmentNames { "segment0", "segment1", "segment2" };
 
@@ -310,8 +310,8 @@ TEST(TravelManager, locationDel_Update_Segment_SrcAndDst) {
 	ASSERT_TRUE(seg2->destination() == null);
 }
 
-TEST(TravelManager, segmentDel_Update_Loc_SrcAndDst) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+TEST(TravelNetworkManager, segmentDel_Update_Loc_SrcAndDst) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> locationNames { "location0", "location1", "location2" };
 	vector<string> segmentNames { "segment0", "segment1", "segment2" };
 
@@ -362,7 +362,7 @@ TEST(TravelManager, segmentDel_Update_Loc_SrcAndDst) {
 
 
 TEST(Stats, onLocation) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto stats = manager->stats();
 	vector<string> names { "location1", "location2", "location3", "location4", "location5" };
 
@@ -402,7 +402,7 @@ TEST(Stats, onLocation) {
 }
 
 TEST(Stats, onSegment) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto stats = manager->stats();
 	vector<string> names { "segment1", "segment2", "segment3", "segment4", "segment5" };
 
@@ -437,7 +437,7 @@ TEST(Stats, onSegment) {
 }
 
 TEST(Stats, onVehicle) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto stats = manager->stats();
 	vector<string> names { "vehicle1", "vehicle2", "vehicle3", "vehicle4", "vehicle5" };
 
@@ -472,7 +472,7 @@ TEST(Stats, onVehicle) {
 }
 
 TEST(LocationAndSegment, SegmentCounts) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	vector<string> locationNames { "location1", "location2", "location3" };
 	vector<string> segmentNames { "segment1", "segment2", "segment3" };
 
@@ -504,7 +504,7 @@ TEST(LocationAndSegment, SegmentCounts) {
 }
 
 TEST(LocationAndSegment, segmentSourceAndDestChanges) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto loc1 = manager->residenceNew("residence-1");
 	const auto loc2 = manager->residenceNew("residence-2");
 	const auto loc3 = manager->residenceNew("residence-3");
@@ -544,7 +544,7 @@ TEST(LocationAndSegment, segmentSourceAndDestChanges) {
 }
 
 TEST(LocationAndSegment, multipleSegments) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto loc1 = manager->airportNew("location-1");
 	const auto loc2 = manager->airportNew("location-2");
 	const auto loc3 = manager->residenceNew("location-3");
@@ -572,7 +572,7 @@ TEST(LocationAndSegment, multipleSegments) {
 }
 
 TEST(LocationAndSegment, locationDel) {
-	const auto manager = TravelManager::instanceNew("manager-1");
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto loc1 = manager->residenceNew("location-1");
 	const auto loc2 = manager->airportNew("location-2");
 	const auto loc3 = manager->residenceNew("location-3");

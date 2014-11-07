@@ -3,8 +3,7 @@
 
 #include "CommonLib.h"
 #include "InstanceManager.h"
-#include "TravelManager.h"
-//#include "TravelManagerTracker.h"
+#include "TravelNetworkManager.h"
 #include "Conn.h"
 
 #include <numeric>
@@ -367,11 +366,11 @@ protected:
 
     protected:
 
-        Ptr<TravelManagerTracker> stats() const {
+        Ptr<TravelNetworkTracker> stats() const {
             return stats_;
         }
 
-        void statsIs(const Ptr<TravelManagerTracker>& stats) {
+        void statsIs(const Ptr<TravelNetworkTracker>& stats) {
             stats_ = stats;
         }
 
@@ -385,7 +384,7 @@ protected:
 
         friend class TravelInstanceManager;
 
-        Ptr<TravelManagerTracker> stats_;
+        Ptr<TravelNetworkTracker> stats_;
 
     };
 
@@ -399,10 +398,10 @@ protected:
     void initialize() {
         // TODO: Finish the implementation.
         // TODO: Ensure that there is no other entity that has the name 'stats' and 'conn'
-        travelManager_ = TravelManager::instanceNew("manager");
+        travelManager_ = TravelNetworkManager::instanceNew("manager");
 
         statsInstance_ = new StatsInstance("stats");
-        //auto travelManagerTracker = TravelManagerTracker::instanceNew("stats");
+        //auto travelManagerTracker = TravelNetworkTracker::instanceNew("stats");
         //travelManagerTracker->notifierIs(travelManager_);
         //statsInstance_->statsIs(travelManagerTracker);
         statsInstance_->statsIs(travelManager_->stats());
@@ -498,7 +497,7 @@ private:
         return (std::find(statsInstanceAliases_.begin(), statsInstanceAliases_.end(), name) != statsInstanceAliases_.end());
     }
 
-    Ptr<TravelManager> travelManager_;
+    Ptr<TravelNetworkManager> travelManager_;
     Ptr<StatsInstance> statsInstance_;
     Ptr<ConnInstance> connInstance_;
     vector<string> connInstanceAliases_;
