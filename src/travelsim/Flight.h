@@ -41,24 +41,26 @@ public:
 		return new Flight(name);
 	}
 
-	virtual void sourceIs(const Ptr<Location>& source) {
-		if (isAirport(source)) {
-			Segment::sourceIs(source);
+	virtual void sourceIs(const Ptr<Location>& src) {
+		if ((src == null) || (isAirport(src))) {
+			Segment::sourceIs(src);
 			return;
 		}
 
 		logError(WARNING, "A Flight segment can have only an Airport as its source. Given location ('" 
-			 + source->name() + "') is not an Airport");
+			+ src->name() + "') is not an Airport");
+			
 	}
 
-	virtual void destinationIs(const Ptr<Location>& destination) {
-		if (isAirport(destination)) {
-			Segment::destinationIs(destination);
+	virtual void destinationIs(const Ptr<Location>& dst) {
+		if ((dst == null) || (isAirport(dst))) {
+			Segment::destinationIs(dst);
 			return;
 		}
 
 		logError(WARNING, "A Flight segment can have only an Airport as its destination. Given location ('" 
-			 + destination->name() + "') is not an Airport");
+			+ dst->name() + "') is not an Airport");
+			
 	}
 
 protected:

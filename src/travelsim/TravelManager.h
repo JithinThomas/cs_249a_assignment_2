@@ -287,6 +287,7 @@ public:
 		const auto location = iter->second;
 		auto next = locationMap_.erase(iter);
 
+		/*
 		// Nullify the 'source' attribute of all segments for which this location was the source
 		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
 			location->sourceSegment(i)->sourceDel();
@@ -296,6 +297,10 @@ public:
 		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
 			location->destinationSegment(i)->destinationDel();
 		}
+		*/
+
+		location->sourceSegmentDelAll();
+		location->destinationSegmentDelAll();
 
 		post(this, &Notifiee::onLocationDel, location);
 
@@ -304,6 +309,9 @@ public:
 
 	segmentIterator segmentDel(segmentConstIter iter) {
 		const auto segment = iter->second;
+		segment->sourceDel();
+		segment->destinationDel();
+
 		auto next = segmentMap_.erase(iter);
 
 		post(this, &Notifiee::onSegmentDel, segment);

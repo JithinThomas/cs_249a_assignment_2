@@ -11,7 +11,6 @@ using fwk::Ordinal;
 using fwk::Ptr;
 
 
-
 class Length {};
 class Miles : public Ordinal<Length, int> {
 public:

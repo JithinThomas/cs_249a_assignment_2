@@ -266,6 +266,101 @@ TEST(TravelManager, vehicleDel) {
 	ASSERT_TRUE(manager->vehicle(names[3]) == v3);
 }
 
+TEST(TravelManager, locationDel_Update_Segment_SrcAndDst) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	vector<string> locationNames { "location0", "location1", "location2" };
+	vector<string> segmentNames { "segment0", "segment1", "segment2" };
+
+	const auto loc0 = manager->airportNew(locationNames[0]);
+	const auto loc1 = manager->residenceNew(locationNames[1]);
+	const auto loc2 = manager->airportNew(locationNames[2]);
+
+	const auto seg0 = manager->flightNew(segmentNames[0]);
+	const auto seg1 = manager->roadNew(segmentNames[1]);
+	const auto seg2 = manager->roadNew(segmentNames[2]);
+
+	seg0->sourceIs(loc0);
+	seg0->destinationIs(loc2);
+
+	seg1->sourceIs(loc0);
+	seg1->destinationIs(loc1);
+
+	seg2->sourceIs(loc1);
+	seg2->destinationIs(loc2);
+
+	ASSERT_TRUE(seg0->source() == loc0);
+	ASSERT_TRUE(seg0->destination() == loc2);
+
+	ASSERT_TRUE(seg1->source() == loc0);
+	ASSERT_TRUE(seg1->destination() == loc1);
+
+	ASSERT_TRUE(seg2->source() == loc1);
+	ASSERT_TRUE(seg2->destination() == loc2);
+
+	manager->locationDel(locationNames[0]);
+	manager->locationDel(locationNames[2]);
+
+	ASSERT_TRUE(seg0->source() == null);
+	ASSERT_TRUE(seg0->destination() == null);
+
+	ASSERT_TRUE(seg1->source() == null);
+	ASSERT_TRUE(seg1->destination() == loc1);
+
+	ASSERT_TRUE(seg2->source() == loc1);
+	ASSERT_TRUE(seg2->destination() == null);
+}
+
+TEST(TravelManager, segmentDel_Update_Loc_SrcAndDst) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	vector<string> locationNames { "location0", "location1", "location2" };
+	vector<string> segmentNames { "segment0", "segment1", "segment2" };
+
+	const auto loc0 = manager->airportNew(locationNames[0]);
+	const auto loc1 = manager->residenceNew(locationNames[1]);
+	const auto loc2 = manager->airportNew(locationNames[2]);
+
+	const auto seg0 = manager->flightNew(segmentNames[0]);
+	const auto seg1 = manager->roadNew(segmentNames[1]);
+	const auto seg2 = manager->roadNew(segmentNames[2]);
+
+	seg0->sourceIs(loc0);
+	seg0->destinationIs(loc2);
+
+	seg1->sourceIs(loc0);
+	seg1->destinationIs(loc1);
+
+	seg2->sourceIs(loc1);
+	seg2->destinationIs(loc2);
+
+	ASSERT_TRUE(loc0->sourceSegment(0) == seg0);
+	ASSERT_TRUE(loc2->destinationSegment(0) == seg0);
+
+	manager->segmentDel(segmentNames[0]);
+
+	ASSERT_EQ(loc0->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc0->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc1->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc1->destinationSegmentCount(), 1);
+
+	ASSERT_EQ(loc2->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc2->destinationSegmentCount(), 1);
+
+	ASSERT_TRUE(loc0->sourceSegment(0) == seg1);
+	ASSERT_TRUE(loc0->sourceSegment(1) == null);
+	ASSERT_TRUE(loc0->destinationSegment(0) == null);
+
+	ASSERT_TRUE(loc1->sourceSegment(0) == seg2);
+	ASSERT_TRUE(loc1->sourceSegment(1) == null);
+	ASSERT_TRUE(loc1->destinationSegment(0) == seg1);
+	ASSERT_TRUE(loc1->destinationSegment(1) == null);
+
+	ASSERT_TRUE(loc2->sourceSegment(0) == null);
+	ASSERT_TRUE(loc2->destinationSegment(0) == seg2);
+	ASSERT_TRUE(loc2->destinationSegment(1) == null);
+}
+
+
 TEST(Stats, onLocation) {
 	const auto manager = TravelManager::instanceNew("manager-1");
 	const auto stats = manager->stats();
@@ -374,6 +469,38 @@ TEST(Stats, onVehicle) {
 	ASSERT_EQ(stats->vehicleCount(), 2);
 	ASSERT_EQ(stats->airplaneCount(), 1);
 	ASSERT_EQ(stats->carCount(), 1);
+}
+
+TEST(LocationAndSegment, SegmentCounts) {
+	const auto manager = TravelManager::instanceNew("manager-1");
+	vector<string> locationNames { "location1", "location2", "location3" };
+	vector<string> segmentNames { "segment1", "segment2", "segment3" };
+
+	const auto loc0 = manager->airportNew(locationNames[0]);
+	const auto loc1 = manager->residenceNew(locationNames[1]);
+	const auto loc2 = manager->airportNew(locationNames[2]);
+
+	const auto seg0 = manager->flightNew(segmentNames[0]);
+	const auto seg1 = manager->roadNew(segmentNames[1]);
+	const auto seg2 = manager->roadNew(segmentNames[2]);
+
+	seg0->sourceIs(loc0);
+	seg0->destinationIs(loc2);
+
+	seg1->sourceIs(loc0);
+	seg1->destinationIs(loc1);
+
+	seg2->sourceIs(loc1);
+	seg2->destinationIs(loc2);
+
+	ASSERT_EQ(loc0->sourceSegmentCount(), 2);
+	ASSERT_EQ(loc0->destinationSegmentCount(), 0);
+
+	ASSERT_EQ(loc1->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc1->destinationSegmentCount(), 1);
+
+	ASSERT_EQ(loc2->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc2->destinationSegmentCount(), 2);
 }
 
 TEST(LocationAndSegment, segmentSourceAndDestChanges) {

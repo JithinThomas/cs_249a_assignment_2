@@ -44,7 +44,6 @@ protected:
 	typedef vector< Ptr<Segment> > SegmentVector;
 	typedef SegmentVector::const_iterator const_iterator;
 	typedef SegmentVector::iterator iterator;
-	//typedef unsigned int SegmentId; // TODO: Should we use Ordinal type for this? To distinguish it from, say, length, etc.?
 	typedef std::list<Notifiee*> NotifieeList;
 
 public:
@@ -85,56 +84,6 @@ public:
 		return destinationSegments_.size();
 	}
 
-	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
-		auto res = addSegment(sourceSegments_, segment);
-		if (res) {
-			post(this, &Notifiee::onSourceSegmentNew, segment);
-		}
-	}
-
-	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
-		auto res = addSegment(destinationSegments_, segment);
-		if (res) {
-			post(this, &Notifiee::onDestinationSegmentNew, segment);
-		}
-	}
-
-	Ptr<Segment> sourceSegmentDel(const Ptr<Segment>& segment) {
-		auto seg = deleteSegment( sourceSegments_, segment);
-		if (seg != null) {
-			post(this, &Notifiee::onSourceSegmentDel, seg);
-		}
-
-		return seg;
-	}
-
-	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
-		auto seg = *iter;
-		auto next = sourceSegments_.erase(iter);
-
-		post(this, &Notifiee::onSourceSegmentDel, seg);
-
-		return next;
-	}
-
-	Ptr<Segment> destinationSegmentDel(const Ptr<Segment>& segment) {
-		auto seg = deleteSegment( destinationSegments_, segment);
-		if (seg != null) {
-			post(this, &Notifiee::onDestinationSegmentDel, seg);
-		}
-
-		return seg;
-	}
-
-	iterator destinationSegmentDel(SegmentVector::const_iterator iter) {
-		auto seg = *iter;
-		auto next = destinationSegments_.erase(iter);
-
-		post(this, &Notifiee::onDestinationSegmentDel, seg);
-		
-		return next;
-	}
-
 	NotifieeList& notifiees() {
         return notifiees_;
     }
@@ -145,6 +94,87 @@ public:
 	void operator ==(const Location&) = delete;
 
 protected:
+
+	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
+		auto res = addSegment(sourceSegments_, segment);
+		if (res) {
+			if (segment->source() != this) {
+				// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
+				segment->sourceIs(this);
+			}
+
+			post(this, &Notifiee::onSourceSegmentNew, segment);
+		}
+	}
+
+	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
+		auto res = addSegment(destinationSegments_, segment);
+		if (res) {
+			if (segment->destination() != this) { 
+				// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
+				segment->destinationIs(this);
+			}
+
+			post(this, &Notifiee::onDestinationSegmentNew, segment);
+		}
+	}
+
+	Ptr<Segment> sourceSegmentDel(const Ptr<Segment>& segment) {
+		auto seg = deleteSegment( sourceSegments_, segment);
+		if (seg != null) {
+			seg->sourceDel();
+			post(this, &Notifiee::onSourceSegmentDel, seg);
+		}
+
+		return seg;
+	}
+
+	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
+		auto seg = *iter;
+		seg->sourceDel();
+
+		auto next = sourceSegments_.erase(iter);
+
+		post(this, &Notifiee::onSourceSegmentDel, seg);
+
+		return next;
+	}
+
+	void sourceSegmentDelAll() {
+		for (auto seg : sourceSegments_) {
+			seg->sourceDel();
+		}
+	}
+
+	Ptr<Segment> destinationSegmentDel(const Ptr<Segment>& segment) {
+		auto seg = deleteSegment( destinationSegments_, segment);
+		if (seg != null) {
+			seg->destinationDel();
+			post(this, &Notifiee::onDestinationSegmentDel, seg);
+		}
+
+		return seg;
+	}
+
+	iterator destinationSegmentDel(SegmentVector::const_iterator iter) {
+		auto seg = *iter;
+		seg->destinationDel();
+
+		auto next = destinationSegments_.erase(iter);
+
+		post(this, &Notifiee::onDestinationSegmentDel, seg);
+		
+		return next;
+	}
+
+	void destinationSegmentDelAll() {
+		for (auto seg : destinationSegments_) {
+			seg->destinationDel();
+		}
+	}
+
+	friend class Segment;
+	friend class TravelManager;
 
 	NotifieeList notifiees_;
 
