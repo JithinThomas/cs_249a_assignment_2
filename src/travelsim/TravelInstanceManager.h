@@ -4,7 +4,6 @@
 #include "CommonLib.h"
 #include "InstanceManager.h"
 #include "TravelNetworkManager.h"
-//#include "Conn.h"
 
 #include <numeric>
 #include <sstream>
@@ -14,7 +13,7 @@ using std::cout;
 using std::endl;
 using std::to_string;
 
-const string entityName(Ptr<NamedInterface> entity) {
+const string getEntityName(Ptr<NamedInterface> entity) {
     if (entity != null) {
         return entity->name();
     }
@@ -22,26 +21,14 @@ const string entityName(Ptr<NamedInterface> entity) {
     return "";
 } 
 
-// TODO: Rename the functions? Change the default return value?
-double strToDouble(const string& str) {
+double strToNonNegativeDouble(const string& str) {
     stringstream ss(str);
     double value;
     if (ss >> value) {
         return value;
     }
 
-    return -1;
-}
-
-// TODO: Rename the functions? Change the default return value?
-int strToInt(const string& str) {
-    stringstream ss(str);
-    int value;
-    if (ss >> value) {
-        return value;
-    }
-
-    return -1;
+    return -1; // Indicates erroneous output
 }
 
 /**
@@ -80,7 +67,7 @@ protected:
             if (i >= 0) {
                 const auto segment = location_->sourceSegment(i);
                 if (segment != null) {
-                    return entityName(segment);
+                    return getEntityName(segment);
                 }
             }
 
@@ -144,9 +131,9 @@ protected:
             }
 
             if (name == "source") {
-                return entityName(segment_->source());
+                return getEntityName(segment_->source());
             } else if (name == "destination") {
-                return entityName(segment_->destination());
+                return getEntityName(segment_->destination());
             } else if (name == "length") {
                 return to_string(segment_->length().value());
             }
@@ -166,7 +153,7 @@ protected:
                         const auto location = travelManager_->location(value);
                         segment_->destinationIs(location);
                     } else if (name == "length") {
-                        auto length = Miles(strToDouble(value));
+                        auto length = Miles(strToNonNegativeDouble(value));
                         segment_->lengthIs(length);
                     } else {
                         logError(WARNING, "Invalid attribute ('" + name + "') specified for Segment. Skipping command.");
@@ -231,11 +218,12 @@ protected:
             if (vehicle_ != null) {
                 try {
                    if (name == "capacity") {
-                        vehicle_->capacityIs(strToInt(value));
+                        //vehicle_->capacityIs(strToInt(value));
+                        vehicle_->capacityIs(std::stoi(value));
                     } else if (name == "cost") {
-                        vehicle_->costIs(strToDouble(value));
+                        vehicle_->costIs(strToNonNegativeDouble(value));
                     } else if (name == "speed") {
-                        vehicle_->speedIs(strToDouble(value));
+                        vehicle_->speedIs(strToNonNegativeDouble(value));
                     } else {
                         logError(WARNING, "Invalid attribute ('" + name + "') specified for Vehicle. Skipping command.");
                     } 

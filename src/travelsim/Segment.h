@@ -63,12 +63,12 @@ public:
 		}
 	}
 
-	/* Sets the source attribute to a default value */
+	/* Resets the source attribute to a default value */
 	void sourceDel() {
 		sourceIs(null);
 	}
 
-	/* Sets the destination attribute to a default value */
+	/* Resets the destination attribute to a default value */
 	void destinationDel() {
 		destinationIs(null);
 	}
@@ -97,7 +97,10 @@ protected:
 		destination_ = null;
 	}
 
-	~Segment() {}
+	virtual ~Segment() {
+		source_ = null;
+		destination_ = null;
+	}
 
 private:
 

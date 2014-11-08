@@ -28,14 +28,6 @@ public:
 	class Path : public PtrInterface {
 	public:
 
-		static Ptr<Path> instanceNew() {
-			return new Path();
-		}
-
-		static Ptr<Path> instanceNew(const Ptr<Path>& p) {
-			return new Path(p);
-		}
-
 		void segmentIs(const Ptr<Segment> segment) {
 			segments_.push_back(segment);
 			length_ = length_ + segment->length();
@@ -60,8 +52,6 @@ public:
 		Miles length() const {
 			return length_;
 		}
-
-	protected:
 
 		Path():
 			length_(0)
@@ -91,7 +81,7 @@ public:
 		set<string> locationsVisited;
 		locationsVisited.insert(location->name());
 
-		return getPathsFromLoc(location, Path::instanceNew(), maxLength, locationsVisited);
+		return getPathsFromLoc(location, new Path(), maxLength, locationsVisited);
 	}
 
 	Conn(const Conn&) = delete;
@@ -127,7 +117,7 @@ private:
 				if ((totalLengthOfPath <= maxLength) && 
 					(destination != null) &&
 					(locationsVisited.find(destination->name()) == locationsVisited.end())) {
-						auto p = Path::instanceNew(pathFromStartLocation);
+						Ptr<Path> p = new Path(pathFromStartLocation);
 						p->segmentIs(segment);
 						validPaths.push_back(p);
 

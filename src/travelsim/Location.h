@@ -16,6 +16,9 @@ using fwk::Ptr;
 using std::find;
 using std::vector;
 
+// ==================================================
+//  Location class
+// ==================================================
 
 class Location : public NamedInterface {
 public:
@@ -52,20 +55,12 @@ public:
 		return new Location(name);
 	}
 
-	Ptr<Segment> sourceSegment(const SegmentId& id) const {
-		return findSegment(sourceSegments_, id);
-	}
+	// ==================================================
+	//  Destination segment methods
+	// ==================================================
 
 	Ptr<Segment> destinationSegment(const SegmentId& id) const {
 		return findSegment(destinationSegments_, id);
-	}
-
-	const_iterator sourceSegmentIter() const {
-		return sourceSegments_.cbegin();
-	}
-
-	const_iterator sourceSegmentIterEnd() const {
-		return sourceSegments_.cend();
 	}
 
 	const_iterator destinationSegmentIter() const {
@@ -76,32 +71,12 @@ public:
 		return destinationSegments_.cend();
 	}
 
-	unsigned int sourceSegmentCount() const {
-		return sourceSegments_.size();
-	}
-
 	unsigned int destinationSegmentCount() const {
 		return destinationSegments_.size();
 	}
 
-	NotifieeList& notifiees() {
-        return notifiees_;
-    }
-
-	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
-		auto res = addSegment(sourceSegments_, segment);
-		if (res) {
-			// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
-			if (segment->source() != this) {
-				segment->sourceIs(this);
-			}
-
-			post(this, &Notifiee::onSourceSegmentNew, segment);
-		}
-	}
-
 	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
-		auto res = addSegment(destinationSegments_, segment);
+		auto res = addSegmentIfNotPresent(destinationSegments_, segment);
 		if (res) {
 			// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
 			if (segment->destination() != this) { 
@@ -109,34 +84,6 @@ public:
 			}
 
 			post(this, &Notifiee::onDestinationSegmentNew, segment);
-		}
-	}
-
-	Ptr<Segment> sourceSegmentDel(const Ptr<Segment>& segment) {
-		auto seg = deleteSegment( sourceSegments_, segment);
-		if (seg != null) {
-			seg->sourceDel();
-			post(this, &Notifiee::onSourceSegmentDel, seg);
-		}
-
-		return seg;
-	}
-
-	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
-		auto seg = *iter;
-		seg->sourceDel();
-
-		auto it = std::find(sourceSegments_.begin(), sourceSegments_.end(), seg);
-		auto next = sourceSegments_.erase(it);
-
-		post(this, &Notifiee::onSourceSegmentDel, seg);
-
-		return next;
-	}
-
-	void sourceSegmentDelAll() {
-		for (auto seg : sourceSegments_) {
-			seg->sourceDel();
 		}
 	}
 
@@ -168,6 +115,70 @@ public:
 		}
 	}
 
+	// ==================================================
+	//  Source segment methods
+	// ==================================================
+
+	Ptr<Segment> sourceSegment(const SegmentId& id) const {
+		return findSegment(sourceSegments_, id);
+	}
+
+	const_iterator sourceSegmentIter() const {
+		return sourceSegments_.cbegin();
+	}
+
+	const_iterator sourceSegmentIterEnd() const {
+		return sourceSegments_.cend();
+	}
+
+	unsigned int sourceSegmentCount() const {
+		return sourceSegments_.size();
+	}
+
+	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
+		auto res = addSegmentIfNotPresent(sourceSegments_, segment);
+		if (res) {
+			// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
+			if (segment->source() != this) {
+				segment->sourceIs(this);
+			}
+
+			post(this, &Notifiee::onSourceSegmentNew, segment);
+		}
+	}
+
+	Ptr<Segment> sourceSegmentDel(const Ptr<Segment>& segment) {
+		auto seg = deleteSegment( sourceSegments_, segment);
+		if (seg != null) {
+			seg->sourceDel();
+			post(this, &Notifiee::onSourceSegmentDel, seg);
+		}
+
+		return seg;
+	}
+
+	iterator sourceSegmentDel(SegmentVector::const_iterator iter) {
+		auto seg = *iter;
+		seg->sourceDel();
+
+		auto it = std::find(sourceSegments_.begin(), sourceSegments_.end(), seg);
+		auto next = sourceSegments_.erase(it);
+
+		post(this, &Notifiee::onSourceSegmentDel, seg);
+
+		return next;
+	}
+
+	void sourceSegmentDelAll() {
+		for (auto seg : sourceSegments_) {
+			seg->sourceDel();
+		}
+	}
+
+	NotifieeList& notifiees() {
+        return notifiees_;
+    }
+
 	Location(const Location&) = delete;
 
 	void operator =(const Location&) = delete;
@@ -185,8 +196,9 @@ protected:
 		// Nothing to do
 	}
 
-	~Location() {
-		//TODO: Do we need to free the Segment pointers in segments_. I don't think so.
+	virtual ~Location() {
+		sourceSegments_.clear();
+		destinationSegments_.clear();
 	}
 
 private:
@@ -199,7 +211,7 @@ private:
 		return null;
 	}
 
-	bool addSegment(SegmentVector& segments, const Ptr<Segment>& segment) {
+	bool addSegmentIfNotPresent(SegmentVector& segments, const Ptr<Segment>& segment) {
 		if (find (segments.begin(), segments.end(), segment) == segments.end()) {
 			segments.push_back(segment); 
 			return true;
@@ -220,17 +232,22 @@ private:
 		return seg;
 	}
 	
-	/* Segments for which the Location object is the 'source' */
+	/* Segments for which this Location object is the 'source' */
 	SegmentVector sourceSegments_;
 
-	/* Segments for which the Location object is the 'destination' */
+	/* Segments for which this Location object is the 'destination' */
 	SegmentVector destinationSegments_;
 };
+
+// ==================================================
+
+// ==================================================
+//  Airport class
+// ==================================================
 
 class Airport : public Location {
 public:
 
-	/* Return a new Airport instance with the given name */
 	static Ptr<Airport> instanceNew(const string& name) {
 		return new Airport(name);
 	}
@@ -240,14 +257,19 @@ protected:
 	explicit Airport(const string& name):
 		Location(name)
 	{
-		// Nothing to do
+		// Nothing else to do
 	}
 };
+
+// ==================================================
+
+// ==================================================
+//  Residence class
+// ==================================================
 
 class Residence : public Location {
 public:
 
-	/* Return a new Residence instance with the given name */
 	static Ptr<Residence> instanceNew(const string& name) {
 		return new Residence(name);
 	}
@@ -275,8 +297,10 @@ protected:
 	explicit Residence(const string& name):
 		Location(name)
 	{
-		// Nothing to do
+		// Nothing else to do
 	}
 };
+
+// ==================================================
 
 #endif
