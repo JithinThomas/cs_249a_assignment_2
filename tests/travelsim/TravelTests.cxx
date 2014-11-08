@@ -853,15 +853,12 @@ TEST(DollarsPerMile, addition) {
 TEST(TravelInstanceManager, Stats) {
 	const auto manager = TravelInstanceManager::instanceManager();
 
-	///*
 	const auto res1 = manager->instanceNew("residence_1", "Residence");
 	const auto flight1 = manager->instanceNew("flight_1", "Flight");
 	
-	///*
 	const auto air1 = manager->instanceNew("airport_1", "Airport");
 	const auto air2 = manager->instanceNew("airport_2", "Airport");
 
-	///*
 	const auto stats = manager->instanceNew("stats_1", "Stats");
 
 	const auto road1 = manager->instanceNew("road_1", "Road");
@@ -875,11 +872,11 @@ TEST(TravelInstanceManager, Stats) {
 	ASSERT_EQ(stats->attribute("Road"), "3");
 
 	const auto stats1 = manager->instanceNew("stats_2", "Stats");
+	
 	ASSERT_EQ(stats1->attribute("Residence"), "1");
 	ASSERT_EQ(stats1->attribute("Airport"), "2");
 	ASSERT_EQ(stats1->attribute("Flight"), "2");
 	ASSERT_EQ(stats1->attribute("Road"), "3");
-	//*/
 }
 
 void setVehicleAttributes(const Ptr<Instance>& instance,
