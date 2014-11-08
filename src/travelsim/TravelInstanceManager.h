@@ -13,6 +13,11 @@ using std::cout;
 using std::endl;
 using std::to_string;
 
+
+//=======================================================
+// Helper methods
+//=======================================================
+
 const string getEntityName(Ptr<NamedInterface> entity) {
     if (entity != null) {
         return entity->name();
@@ -30,6 +35,8 @@ double strToNonNegativeDouble(const string& str) {
 
     return -1; // Indicates erroneous output
 }
+
+//=======================================================
 
 /**
  * InstanceManager implementation for the travel simulation.
