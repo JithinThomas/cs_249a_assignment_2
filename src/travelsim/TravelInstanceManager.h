@@ -96,7 +96,7 @@ protected:
             location_ = location;
         }
 
-        LocationInstance(const string& name) :
+        explicit LocationInstance(const string& name) :
             Instance(name)
         {
             location_ = null;
@@ -173,7 +173,7 @@ protected:
             segment_ = segment;
         }
 
-        SegmentInstance(const string& name) :
+        explicit SegmentInstance(const string& name) :
             Instance(name)
         {
             segment_ = null;
@@ -238,7 +238,7 @@ protected:
             vehicle_ = vehicle;
         }
 
-        VehicleInstance(const string& name) :
+        explicit VehicleInstance(const string& name) :
             Instance(name)
         {
             vehicle_ = null;
@@ -374,7 +374,7 @@ protected:
             stats_ = stats;
         }
 
-        StatsInstance(const string& name) :
+        explicit StatsInstance(const string& name) :
             Instance(name)
         {
            stats_ = null; 
@@ -396,22 +396,7 @@ protected:
      * Initialize any state in the manager.
      */
     void initialize() {
-        // TODO: Finish the implementation.
-        // TODO: Ensure that there is no other entity that has the name 'stats' and 'conn'
         travelManager_ = TravelNetworkManager::instanceNew("manager");
-
-        statsInstance_ = new StatsInstance("stats");
-        //auto travelManagerTracker = TravelNetworkTracker::instanceNew("stats");
-        //travelManagerTracker->notifierIs(travelManager_);
-        //statsInstance_->statsIs(travelManagerTracker);
-        statsInstance_->statsIs(travelManager_->stats());
-        statsInstance_->travelManagerIs(travelManager_);
-
-        connInstance_ = new ConnInstance("conn");
-        //auto conn = Conn::instanceNew("conn");
-        //connInstance_->connIs(conn);
-        connInstance_->connIs(travelManager_->conn());
-        connInstance_->travelManagerIs(travelManager_);
     }
 
     /**
@@ -419,37 +404,32 @@ protected:
      * The spec parameter indicates additional information about
      * the instance, such as its type.
      */
-    // TODO: Finish the implementation.
     Ptr<Instance> createInstance(const string& name, const string& spec) {
-        if (!isStatsInstanceAlias(name) && !isConnInstanceAlias(name)) {
-            if (spec == "Residence") {
-                auto residence = travelManager_->residenceNew(name);
-                return createLocationInstance(name, residence);
-            } else if (spec == "Airport") {
-                auto airport = travelManager_->airportNew(name);
-                return createLocationInstance(name, airport);
-            } else if (spec == "Flight") {
-                auto flight = travelManager_->flightNew(name);
-                return createSegmentInstance(name, flight);
-            } else if (spec == "Road") {
-                auto road = travelManager_->roadNew(name);
-                return createSegmentInstance(name, road);
-            }  else if (spec == "Airplane") {
-                auto airplane = travelManager_->airplaneNew(name);
-                return createVehicleInstance(name, airplane);
-            }  else if (spec == "Car") {
-                auto car = travelManager_->carNew(name);
-                return createVehicleInstance(name, car);
-            }  else if (spec == "Conn") {
-                connInstanceAliases_.push_back(name);
-                return connInstance_;
-            }  else if (spec == "Stats") {
-                statsInstanceAliases_.push_back(name);
-                return statsInstance_;
-            } 
+        if (spec == "Residence") {
+            auto residence = travelManager_->residenceNew(name);
+            return createLocationInstance(name, residence);
+        } else if (spec == "Airport") {
+            auto airport = travelManager_->airportNew(name);
+            return createLocationInstance(name, airport);
+        } else if (spec == "Flight") {
+            auto flight = travelManager_->flightNew(name);
+            return createSegmentInstance(name, flight);
+        } else if (spec == "Road") {
+            auto road = travelManager_->roadNew(name);
+            return createSegmentInstance(name, road);
+        }  else if (spec == "Airplane") {
+            auto airplane = travelManager_->airplaneNew(name);
+            return createVehicleInstance(name, airplane);
+        }  else if (spec == "Car") {
+            auto car = travelManager_->carNew(name);
+            return createVehicleInstance(name, car);
+        }  else if (spec == "Conn") {
+            return createConnInstance(name);
+        }  else if (spec == "Stats") {
+            return createStatsInstance(name);
+        } 
 
-            logError(WARNING, "Unexpected spec for createInstance(): '" + spec + "'");
-        }
+        logError(WARNING, "Unexpected spec for createInstance(): '" + spec + "'");
 
         return null;
     }
@@ -489,19 +469,21 @@ private:
         return null;
     }
 
-    bool isConnInstanceAlias(const string& name) {
-        return (std::find(connInstanceAliases_.begin(), connInstanceAliases_.end(), name) != connInstanceAliases_.end());
+    Ptr<StatsInstance> createStatsInstance(const string& name) {
+        auto instance = new StatsInstance(name);
+        instance->statsIs(travelManager_->stats());
+        instance->travelManagerIs(travelManager_);
+        return instance;
     }
 
-    bool isStatsInstanceAlias(const string& name) {
-        return (std::find(statsInstanceAliases_.begin(), statsInstanceAliases_.end(), name) != statsInstanceAliases_.end());
+    Ptr<ConnInstance> createConnInstance(const string& name) {
+        auto instance = new ConnInstance(name);
+        instance->connIs(travelManager_->conn());
+        instance->travelManagerIs(travelManager_);
+        return instance;
     }
 
     Ptr<TravelNetworkManager> travelManager_;
-    Ptr<StatsInstance> statsInstance_;
-    Ptr<ConnInstance> connInstance_;
-    vector<string> connInstanceAliases_;
-    vector<string> statsInstanceAliases_;
 };
 
 const string TravelInstanceManager::LocationInstance::segmentStr = "segment";
