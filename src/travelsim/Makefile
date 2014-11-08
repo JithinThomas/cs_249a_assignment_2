@@ -6,6 +6,8 @@ CXXFLAGS = \
     -Wall \
     -Wno-unused-function
 
+all: client1 client2 client3
+
 client1: always
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o client1 $(SRC)/travelsim/client1.cxx
 
