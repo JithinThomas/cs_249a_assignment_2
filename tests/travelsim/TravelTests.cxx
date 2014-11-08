@@ -2,7 +2,7 @@
 #include "fwk/fwk.h"
 #include "TravelNetworkManager.h"
 #include "Conn.h"
-
+#include "TravelInstanceManager.h"
 
 void initializeSegment(const Ptr<Segment> seg, 
 						   const Ptr<Location>& source, 
@@ -848,4 +848,141 @@ TEST(DollarsPerMile, addition) {
 	DollarsPerMile m3 = m1 + m2;
 
 	ASSERT_TRUE(m3 == DollarsPerMile(11.3));
+}
+
+TEST(TravelInstanceManager, Stats) {
+	const auto manager = TravelInstanceManager::instanceManager();
+
+	///*
+	const auto res1 = manager->instanceNew("residence_1", "Residence");
+	const auto flight1 = manager->instanceNew("flight_1", "Flight");
+	
+	///*
+	const auto air1 = manager->instanceNew("airport_1", "Airport");
+	const auto air2 = manager->instanceNew("airport_2", "Airport");
+
+	///*
+	const auto stats = manager->instanceNew("stats_1", "Stats");
+
+	const auto road1 = manager->instanceNew("road_1", "Road");
+	const auto flight2 = manager->instanceNew("flight_2", "Flight");
+	const auto road2 = manager->instanceNew("road_2", "Road");
+	const auto road3 = manager->instanceNew("road_3", "Road");
+
+	ASSERT_EQ(stats->attribute("Residence"), "1");
+	ASSERT_EQ(stats->attribute("Airport"), "2");
+	ASSERT_EQ(stats->attribute("Flight"), "2");
+	ASSERT_EQ(stats->attribute("Road"), "3");
+
+	const auto stats1 = manager->instanceNew("stats_2", "Stats");
+	ASSERT_EQ(stats1->attribute("Residence"), "1");
+	ASSERT_EQ(stats1->attribute("Airport"), "2");
+	ASSERT_EQ(stats1->attribute("Flight"), "2");
+	ASSERT_EQ(stats1->attribute("Road"), "3");
+	//*/
+}
+
+void setVehicleAttributes(const Ptr<Instance>& instance,
+						  const string& cost,
+						  const string& capacity,
+						  const string& speed) {
+	instance->attributeIs("cost", cost);
+	instance->attributeIs("capacity", capacity);
+	instance->attributeIs("speed", speed);
+}
+
+void verifyVehicleAttrValues(const Ptr<Instance>& instance,
+						  	 const string& cost,
+						  	 const string& capacity,
+						  	 const string& speed) {
+	ASSERT_EQ(instance->attribute("cost"), cost);
+	ASSERT_EQ(instance->attribute("capacity"), capacity);
+	ASSERT_EQ(instance->attribute("speed"), speed);
+}
+
+TEST(TravelInstanceManager, VehicleInstance) {
+	const auto manager = TravelInstanceManager::instanceManager();
+	const auto plane = manager->instanceNew("plane", "Airplane");
+
+	verifyVehicleAttrValues(plane, "0.000000", "0", "0");
+
+	setVehicleAttributes(plane, "3.45", "7", "16");
+	verifyVehicleAttrValues(plane, "3.450000", "7", "16");
+
+	setVehicleAttributes(plane, "-53.8", "-91", "-6");
+	verifyVehicleAttrValues(plane, "3.450000", "7", "16");
+
+	setVehicleAttributes(plane, "5.6", "29", "21");
+	verifyVehicleAttrValues(plane, "5.600000", "29", "21");
+
+	ASSERT_EQ(plane->attribute("qtwr"), "");
+	plane->attributeIs("opow", "");
+
+	verifyVehicleAttrValues(plane, "5.600000", "29", "21");
+
+	const auto car = manager->instanceNew("car", "Car");
+
+	verifyVehicleAttrValues(car, "0.000000", "0", "0");
+
+	setVehicleAttributes(car, "49.352", "58", "124");
+	verifyVehicleAttrValues(car, "49.352000", "58", "124");
+
+	setVehicleAttributes(car, "-53.8", "-91", "-6");
+	verifyVehicleAttrValues(car, "49.352000", "58", "124");
+}
+
+void setSegmentAttributes(const Ptr<Instance>& instance,
+						  const string& source,
+						  const string& destination,
+						  const string& length) {
+	instance->attributeIs("source", source);
+	instance->attributeIs("destination", destination);
+	instance->attributeIs("length", length);
+}
+
+void verifySegmentAttrValues(const Ptr<Instance>& instance,
+						  	 const string& source,
+						  	 const string& destination,
+						  	 const string& length) {
+	ASSERT_EQ(instance->attribute("source"), source);
+	ASSERT_EQ(instance->attribute("destination"), destination);
+	ASSERT_EQ(instance->attribute("length"), length);
+}
+
+TEST(TravelInstanceManager, SegmentInstance) {
+	const auto manager = TravelInstanceManager::instanceManager();
+	const auto flight = manager->instanceNew("flight", "Flight");
+	const auto res1 = manager->instanceNew("residence-1", "Residence");
+	const auto air1 = manager->instanceNew("airport-1", "Airport");
+	const auto air2 = manager->instanceNew("airport-2", "Airport");
+
+	verifySegmentAttrValues(flight, "", "", "0.000000");
+
+	setSegmentAttributes(flight, "residence-1", "airport-1", "34");
+	verifySegmentAttrValues(flight, "", "airport-1", "34.000000");
+
+	setSegmentAttributes(flight, "airport-1", "airport-2", "4");
+	verifySegmentAttrValues(flight, "airport-1", "airport-2", "4.000000");
+
+	setSegmentAttributes(flight, "airport-2", "residence-1", "-23");
+	verifySegmentAttrValues(flight, "airport-2", "airport-2", "4.000000");
+
+	const auto road = manager->instanceNew("road", "Road");
+
+	verifySegmentAttrValues(road, "", "", "0.000000");	
+
+	setSegmentAttributes(road, "residence-1", "airport-1", "34");
+	verifySegmentAttrValues(road, "residence-1", "airport-1", "34.000000");
+
+	setSegmentAttributes(road, "airport-1", "airport-2", "4");
+	verifySegmentAttrValues(road, "airport-1", "airport-2", "4.000000");
+
+	setSegmentAttributes(road, "airport-2", "residence-1", "-23");
+	verifySegmentAttrValues(road, "airport-2", "residence-1", "4.000000");
+
+	ASSERT_EQ(res1->attribute("segment1"), "");
+	ASSERT_EQ(air1->attribute("segment1"), "");
+	ASSERT_EQ(air2->attribute("segment1"), "flight");
+	ASSERT_EQ(air2->attribute("segment2"), "road");
+	ASSERT_EQ(air2->attribute("segment3"), "");
 }
