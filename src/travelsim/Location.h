@@ -88,18 +88,11 @@ public:
         return notifiees_;
     }
 
-	Location(const Location&) = delete;
-
-	void operator =(const Location&) = delete;
-	void operator ==(const Location&) = delete;
-
-protected:
-
 	virtual void sourceSegmentIs(const Ptr<Segment>& segment) {
 		auto res = addSegment(sourceSegments_, segment);
 		if (res) {
+			// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
 			if (segment->source() != this) {
-				// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
 				segment->sourceIs(this);
 			}
 
@@ -110,8 +103,8 @@ protected:
 	virtual void destinationSegmentIs(const Ptr<Segment>& segment) {
 		auto res = addSegment(destinationSegments_, segment);
 		if (res) {
+			// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
 			if (segment->destination() != this) { 
-				// To avoid infinite chain of method calls due to cicular dependency between segment and location updates
 				segment->destinationIs(this);
 			}
 
@@ -175,8 +168,12 @@ protected:
 		}
 	}
 
-	friend class Segment;
-	friend class TravelNetworkManager;
+	Location(const Location&) = delete;
+
+	void operator =(const Location&) = delete;
+	void operator ==(const Location&) = delete;
+
+protected:
 
 	NotifieeList notifiees_;
 

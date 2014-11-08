@@ -4,6 +4,37 @@
 #include "Conn.h"
 
 
+void initializeSegment(const Ptr<Segment> seg, 
+						   const Ptr<Location>& source, 
+						   const Ptr<Location>& destination, 
+						   const Miles& length) {
+	seg->sourceIs(source);
+	seg->destinationIs(destination);
+	seg->lengthIs(length);
+}
+
+Ptr<Flight> createFlightSegment(const Ptr<TravelNetworkManager>& travelNetwork,
+						   	  const string& name, 
+						      const Ptr<Location>& source, 
+						      const Ptr<Location>& destination, 
+						      const Miles& length) {
+	const auto seg = travelNetwork->flightNew(name);
+	initializeSegment(seg, source, destination, length);
+
+	return seg;
+}
+
+Ptr<Road> createRoadSegment(const Ptr<TravelNetworkManager>& travelNetwork,
+						   const string& name, 
+						   const Ptr<Location>& source, 
+						   const Ptr<Location>& destination, 
+						   const Miles& length) {
+	const auto seg = travelNetwork->roadNew(name);
+	initializeSegment(seg, source, destination, length);
+
+	return seg;
+}
+
 TEST(TravelNetworkManager, instanceNew) {
 	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	ASSERT_TRUE(manager != null);
@@ -604,11 +635,106 @@ TEST(LocationAndSegment, locationDel) {
 	ASSERT_EQ(seg2->destination(), null);
 }
 
-TEST(Location, SegmentId) {
+string getSourceSegmentList(const Ptr<Location> loc) {
+	string res = "";
+	for (auto it = loc->sourceSegmentIter(); it != loc->sourceSegmentIterEnd(); it++) {
+		auto seg = *it;
+		res += seg->name() + ", ";
+	}
+
+	return res;
+}
+
+string getDestinationSegmentList(const Ptr<Location> loc) {
+	string res = "";
+	for (auto it = loc->destinationSegmentIter(); it != loc->destinationSegmentIterEnd(); it++) {
+		auto seg = *it;
+		res += seg->name() + ", ";
+	}
+
+	return res;
+}
+
+TEST(Location, SegmentColls) {
 	const auto manager = TravelNetworkManager::instanceNew("manager-1");
 	const auto loc1 = manager->residenceNew("location-1");
+	const auto loc2 = manager->residenceNew("location-2");
+	const auto loc3 = manager->residenceNew("location-3");
+	const auto loc4 = manager->airportNew("location-4");
+	const auto loc5 = manager->airportNew("location-5");
 
-	ASSERT_TRUE(loc1->sourceSegment(0) == null);
+	const auto seg1 = createRoadSegment(manager, "road-1", loc1, loc2, 30);
+	const auto seg2 = createRoadSegment(manager, "road-2", loc1, loc3, 20);
+	const auto seg3 = createRoadSegment(manager, "road-3", loc2, loc3, 10);
+	const auto seg4 = createRoadSegment(manager, "flight-1", loc4, loc5, 80);
+	const auto seg5 = createRoadSegment(manager, "flight-2", loc4, loc5, 50);
+
+	/* source segment counts */
+	ASSERT_EQ(loc1->sourceSegmentCount(), 2);
+	ASSERT_EQ(loc2->sourceSegmentCount(), 1);
+	ASSERT_EQ(loc3->sourceSegmentCount(), 0);
+	ASSERT_EQ(loc4->sourceSegmentCount(), 2);
+	ASSERT_EQ(loc5->sourceSegmentCount(), 0);
+
+	/* destination segment counts */
+	ASSERT_EQ(loc1->destinationSegmentCount(), 0);
+	ASSERT_EQ(loc2->destinationSegmentCount(), 1);
+	ASSERT_EQ(loc3->destinationSegmentCount(), 2);
+	ASSERT_EQ(loc4->destinationSegmentCount(), 0);
+	ASSERT_EQ(loc5->destinationSegmentCount(), 2);
+
+	/* source segment accessor */
+	ASSERT_EQ(loc1->sourceSegment(0), seg1);
+	ASSERT_EQ(loc1->sourceSegment(1), seg2);
+	ASSERT_EQ(loc1->sourceSegment(2), null);
+
+	/* destination segment accessor */
+	ASSERT_EQ(loc5->destinationSegment(0), seg4);
+	ASSERT_EQ(loc5->destinationSegment(1), seg5);
+	ASSERT_EQ(loc5->destinationSegment(2), null);
+
+	/* source segment iter */
+	ASSERT_EQ(getSourceSegmentList(loc1), "road-1, road-2, ");
+	ASSERT_EQ(getSourceSegmentList(loc2), "road-3, ");
+	ASSERT_EQ(getSourceSegmentList(loc3), "");
+	ASSERT_EQ(getSourceSegmentList(loc4), "flight-1, flight-2, ");
+	ASSERT_EQ(getSourceSegmentList(loc5), "");
+
+	/* destination segment iter */
+	ASSERT_EQ(getDestinationSegmentList(loc1), "");
+	ASSERT_EQ(getDestinationSegmentList(loc2), "road-1, ");
+	ASSERT_EQ(getDestinationSegmentList(loc3), "road-2, road-3, ");
+	ASSERT_EQ(getDestinationSegmentList(loc4), "");
+	ASSERT_EQ(getDestinationSegmentList(loc5), "flight-1, flight-2, ");
+
+	/* source segment iter delAll */
+	loc1->sourceSegmentDelAll();
+	ASSERT_EQ(getSourceSegmentList(loc1), "");
+
+	/* destination segment iter delAll */
+	loc5->destinationSegmentDelAll();
+	ASSERT_EQ(getDestinationSegmentList(loc5), "");
+
+	/* source segment del */
+	loc2->sourceSegmentDel(seg3);
+	ASSERT_EQ(getSourceSegmentList(loc2), "");
+
+	/* destination segment del */
+	loc3->destinationSegmentDel(seg3);
+	ASSERT_EQ(getDestinationSegmentList(loc3), "road-2, ");
+}
+
+TEST(Location, Source_SegmentId) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	const auto loc1 = manager->residenceNew("location-1");
+	const auto loc2 = manager->residenceNew("location-2");
+
+	const auto seg1 = manager->roadNew("segment-1");
+	seg1->sourceIs(loc1);
+	seg1->destinationIs(loc2);
+
+	ASSERT_TRUE(loc1->sourceSegment(0) == seg1);
+	ASSERT_TRUE(loc1->sourceSegment(1) == null);
 
 	try {
 		loc1->sourceSegment(-1);
@@ -618,4 +744,108 @@ TEST(Location, SegmentId) {
 	}
 
 	ASSERT_TRUE(false);
+}
+
+TEST(Location, Destination_SegmentId) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	const auto loc1 = manager->residenceNew("location-1");
+	const auto loc2 = manager->residenceNew("location-2");
+
+	const auto seg1 = manager->roadNew("segment-1");
+	seg1->sourceIs(loc1);
+	seg1->destinationIs(loc2);
+
+	ASSERT_TRUE(loc2->destinationSegment(0) == seg1);
+	ASSERT_TRUE(loc2->destinationSegment(1) == null);
+
+	try {
+		loc1->destinationSegment(-1);
+	} catch (fwk::RangeException& e) {
+		ASSERT_TRUE(true);
+		return;
+	}
+
+	ASSERT_TRUE(false);
+}
+
+TEST(HelperMethods, isResidence) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isResidence(null));
+	ASSERT_TRUE(isResidence(manager->residenceNew("abc")));
+	ASSERT_FALSE(isResidence(manager->airportNew("wer")));
+}
+
+TEST(HelperMethods, isAirport) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isAirport(null));
+	ASSERT_TRUE(isAirport(manager->airportNew("abc")));
+	ASSERT_FALSE(isAirport(manager->residenceNew("wer")));
+}
+
+TEST(HelperMethods, isFlight) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isFlight(null));
+	ASSERT_TRUE(isFlight(manager->flightNew("abc")));
+	ASSERT_FALSE(isFlight(manager->roadNew("wer")));
+}
+
+TEST(HelperMethods, isRoad) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isRoad(null));
+	ASSERT_TRUE(isRoad(manager->roadNew("abc")));
+	ASSERT_FALSE(isRoad(manager->flightNew("wer")));
+}
+
+TEST(HelperMethods, isAirplane) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isAirplane(null));
+	ASSERT_FALSE(isAirplane(manager->carNew("abc")));
+	ASSERT_TRUE(isAirplane(manager->airplaneNew("wer")));
+}
+
+TEST(HelperMethods, isCar) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	ASSERT_FALSE(isCar(null));
+	ASSERT_TRUE(isCar(manager->carNew("abc")));
+	ASSERT_FALSE(isCar(manager->airplaneNew("wer")));
+}
+
+TEST(Miles, addition) {
+	Miles m1(3.4);
+	Miles m2(5.2);
+	Miles m3 = m1 + m2;
+
+	ASSERT_TRUE(m3 == Miles(8.6));
+}
+
+TEST(MilesPerHour, addition) {
+	MilesPerHour m1(3);
+	MilesPerHour m2(7);
+	MilesPerHour m3 = m1 + m2;
+
+	ASSERT_EQ(m3.value(), 10);
+}
+
+TEST(SegmentId, addition) {
+	SegmentId m1(3);
+	SegmentId m2(7);
+	SegmentId m3 = m1 + m2;
+
+	ASSERT_EQ(m3.value(), 10);
+}
+
+TEST(PassengerCount, addition) {
+	PassengerCount m1(3);
+	PassengerCount m2(7);
+	PassengerCount m3 = m1 + m2;
+
+	ASSERT_EQ(m3.value(), 10);
+}
+
+TEST(DollarsPerMile, addition) {
+	DollarsPerMile m1(3.9);
+	DollarsPerMile m2(7.4);
+	DollarsPerMile m3 = m1 + m2;
+
+	ASSERT_TRUE(m3 == DollarsPerMile(11.3));
 }
