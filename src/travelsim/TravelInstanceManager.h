@@ -155,10 +155,20 @@ protected:
                 try {
                     if (name == "source") {
                         const auto location = travelManager_->location(value);
-                        segment_->sourceIs(location);
+                        if (location != null) {
+                            segment_->sourceIs(location);
+                            return;
+                        }
+                        
+                        logError(WARNING, "Specified location '" + value + "' does not exist. Skipping command.");
                     } else if (name == "destination") {
                         const auto location = travelManager_->location(value);
-                        segment_->destinationIs(location);
+                        if (location != null) {
+                            segment_->destinationIs(location);
+                            return;
+                        }
+
+                        logError(WARNING, "Specified location '" + value + "' does not exist. Skipping command.");
                     } else if (name == "length") {
                         auto length = Miles(strToNonNegativeDouble(value));
                         segment_->lengthIs(length);
