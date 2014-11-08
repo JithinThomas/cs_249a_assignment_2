@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Segment.h"
+#include "ValueTypes.h"
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
@@ -15,7 +16,6 @@ using fwk::Ptr;
 using std::find;
 using std::vector;
 
-// TODO: Need to define Notifiee type
 
 class Location : public NamedInterface {
 public:
@@ -52,11 +52,11 @@ public:
 		return new Location(name);
 	}
 
-	Ptr<Segment> sourceSegment(const U32 id) const {
+	Ptr<Segment> sourceSegment(const SegmentId& id) const {
 		return findSegment(sourceSegments_, id);
 	}
 
-	Ptr<Segment> destinationSegment(const U32 id) const {
+	Ptr<Segment> destinationSegment(const SegmentId& id) const {
 		return findSegment(destinationSegments_, id);
 	}
 
@@ -194,9 +194,9 @@ protected:
 
 private:
 
-	Ptr<Segment> findSegment(const SegmentVector& segments, const U32 id) const {
+	Ptr<Segment> findSegment(const SegmentVector& segments, const SegmentId& id) const {
 		if (id < segments.size()) {
-			return segments[id];
+			return segments[id.value()];
 		}
 
 		return null;

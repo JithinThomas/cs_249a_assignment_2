@@ -3,6 +3,7 @@
 #define VEHICLE_H
 
 #include "CommonLib.h"
+#include "ValueTypes.h"
 
 using fwk::BaseNotifiee;
 using fwk::NamedInterface;
@@ -10,97 +11,6 @@ using fwk::Ordinal;
 using fwk::NotifierLib::post;
 using fwk::Ptr;
 
-class Capacity {};
-class PassengerCount : public Ordinal<Capacity, int> {
-public:
-
-	// TODO: Is there a better way than defining these 3 constructors?
-	PassengerCount(const int value = 0) :
-		Ordinal(value)
-	{
-		if (value < 0) {
-			throw fwk::RangeException("PassengerCount cannot be negative ('" + std::to_string(value) + "')");
-		}
-	}
-
-	PassengerCount(const Ordinal<Capacity, int>& c) :
-		PassengerCount(c.value()) 
-	{
-		// Nothing else to do
-	}
-
-	PassengerCount(const PassengerCount& c):
-		PassengerCount(c.value_)
-	{
-		// Nothing else to do
-	}	
-};
-
-class Speed {};
-class MilesPerHour : public Ordinal<Speed, int> {
-public:
-
-	MilesPerHour(const int value = 0) :
-		Ordinal(value)
-	{
-		if (value < 0) {
-			throw fwk::RangeException("MilesPerHour cannot be negative ('" + std::to_string(value) + "')");
-		}
-	}
-
-	MilesPerHour(const Ordinal<Speed, int>& c) :
-		MilesPerHour(c.value()) 
-	{
-		// Nothing else to do
-	}
-
-	MilesPerHour(const MilesPerHour& m):
-		MilesPerHour(m.value_)
-	{
-		// Nothing else to do
-	}	
-};
-
-class Vehicle;
-class DollarsPerMile : public Ordinal<Vehicle, double> {
-public:
-
-	static constexpr double tolerance = 1e-4;
-
-	DollarsPerMile(const double value = 0) :
-		Ordinal(value)
-	{
-		if (value < 0) {
-			throw fwk::RangeException("DollarsPerMile cannot be negative");
-		}
-	}
-
-	DollarsPerMile(const Ordinal<Vehicle, int>& c) :
-		DollarsPerMile(c.value()) 
-	{
-		// Nothing else to do
-	}
-
-	DollarsPerMile(const DollarsPerMile& cost) :
-		DollarsPerMile(cost.value_)
-	{
-		// Nothing else to do.
-	}
-
-	double value() const {
-		return value_;
-	}
-
-	/** Test for equality using a builtin tolerance. */
-	virtual bool operator ==(const DollarsPerMile& cost) {
-		return (value_ < cost.value_ + tolerance) && (value_ > cost.value_ - tolerance);
-	}
-
-	/** Test for inequality using a builtin tolerance. */
-    virtual bool operator !=(const DollarsPerMile& cost) const {
-        return (value_ >= cost.value_ + tolerance) || (value_ <= cost.value_ - tolerance);
-    }
-};
 
 class Vehicle : public NamedInterface {
 public:

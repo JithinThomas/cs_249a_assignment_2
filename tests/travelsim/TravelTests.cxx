@@ -3,7 +3,6 @@
 #include "TravelNetworkManager.h"
 #include "Conn.h"
 
-using std::to_string;
 
 TEST(TravelNetworkManager, instanceNew) {
 	const auto manager = TravelNetworkManager::instanceNew("manager-1");
@@ -605,9 +604,18 @@ TEST(LocationAndSegment, locationDel) {
 	ASSERT_EQ(seg2->destination(), null);
 }
 
+TEST(Location, SegmentId) {
+	const auto manager = TravelNetworkManager::instanceNew("manager-1");
+	const auto loc1 = manager->residenceNew("location-1");
 
+	ASSERT_TRUE(loc1->sourceSegment(0) == null);
 
+	try {
+		loc1->sourceSegment(-1);
+	} catch (fwk::RangeException& e) {
+		ASSERT_TRUE(true);
+		return;
+	}
 
-
-
-
+	ASSERT_TRUE(false);
+}
