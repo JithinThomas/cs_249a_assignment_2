@@ -63,9 +63,6 @@ public:
 			connect(travelManager, this);
 		}
 
-		// TODO: Just have a notification for LocationNew, SegmentNew and VehicleNew
-		//       The implementation class can check the dynamic type of the new object and act accordingly
-
 		/* Notification that a new Residence has been instantiated */
 		virtual void onResidenceNew(const Ptr<Residence>& residence) { }
 
@@ -286,18 +283,6 @@ public:
 	locationIterator locationDel(locationConstIter iter) {
 		const auto location = iter->second;
 		auto next = locationMap_.erase(iter);
-
-		/*
-		// Nullify the 'source' attribute of all segments for which this location was the source
-		for (auto i = 0; i < location->sourceSegmentCount(); i++) {
-			location->sourceSegment(i)->sourceDel();
-		}
-
-		// Nullify the 'destintaion' attribute of all segments for which this location was the destination
-		for (auto i = 0; i < location->destinationSegmentCount(); i++) {
-			location->destinationSegment(i)->destinationDel();
-		}
-		*/
 
 		location->sourceSegmentDelAll();
 		location->destinationSegmentDelAll();

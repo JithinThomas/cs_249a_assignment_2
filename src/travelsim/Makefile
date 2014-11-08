@@ -12,7 +12,10 @@ client1: always
 client2: always
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o client2 $(SRC)/travelsim/client2.cxx
 
+client3: always
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o client3 $(SRC)/travelsim/client3.cxx
+
 clean:
-	rm -f client1 client2 *.o *~
+	rm -f client1 client2 client3 *.o *~
 
 always:

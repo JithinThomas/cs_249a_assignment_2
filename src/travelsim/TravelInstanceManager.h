@@ -4,7 +4,7 @@
 #include "CommonLib.h"
 #include "InstanceManager.h"
 #include "TravelNetworkManager.h"
-#include "Conn.h"
+//#include "Conn.h"
 
 #include <numeric>
 #include <sstream>
@@ -71,10 +71,17 @@ protected:
 
         _noinline
         string attribute(const string& name) {
+            if (location_ == null) {
+                logError(WARNING, "Internal Error in attribute() within LocationInstance. [location_ == null]");
+                return "";
+            }
+
             const auto i = segmentNumber(name) - 1;
             if (i >= 0) {
                 const auto segment = location_->sourceSegment(i);
-                return entityName(segment);
+                if (segment != null) {
+                    return entityName(segment);
+                }
             }
 
             logError(WARNING, "Invalid attribute ('" + name + "') specified for Location. Skipping command.");
@@ -116,7 +123,9 @@ protected:
         int segmentNumber(const string& name) {
             if (name.substr(0, segmentStrlen) == segmentStr) {
                 auto tmp = name.substr(segmentStrlen, name.length() - segmentStrlen);
-                return strToInt(tmp);
+                try {
+                    return std::stoi(tmp);
+                } catch (std::invalid_argument& e) { }
             }
 
             return -1;
@@ -129,6 +138,11 @@ protected:
 
         _noinline
         string attribute(const string& name) {
+            if (segment_ == null) {
+                logError(WARNING, "Internal Error in attributeIs() within SegmentInstance. [segment_ == null]");
+                return "";
+            }
+
             if (name == "source") {
                 return entityName(segment_->source());
             } else if (name == "destination") {
@@ -160,6 +174,8 @@ protected:
                 } catch (const fwk::RangeException& e) {
                     logError(WARNING, e.what());
                 }
+            } else {
+                logError(WARNING, "Internal Error in attributeIs() within SegmentInstance. [segment_ == null]");
             }
         }
 
@@ -194,6 +210,7 @@ protected:
         _noinline
         string attribute(const string& name) {
             if (vehicle_ == null) {
+                logError(WARNING, "Internal Error in attribute() within VehicleInstance. [vehicle_ == null]");
                 return "";
             }
 
@@ -225,6 +242,8 @@ protected:
                 } catch (const fwk::RangeException& e) {
                     logError(WARNING, e.what());
                 }
+            } else {
+                logError(WARNING, "Internal Error in attributeIs() within VehicleInstance. [vehicle_ == null]");
             }
         }
 
@@ -284,7 +303,6 @@ protected:
             auto paths = conn_->paths(location, Miles(maxLength));
             string allPathsStr = "";
             for (auto p : paths) {
-                //allPathsStr += p->toString() + "\n";
                 allPathsStr += toString(p) + "\n";
             }
 
@@ -342,6 +360,7 @@ protected:
         _noinline
         string attribute(const string& name) {
             if (stats_ == null) {
+                logError(WARNING, "Internal Error in attribute() within StatsInstance. [stats_ == null]");
                 return "";
             }
 

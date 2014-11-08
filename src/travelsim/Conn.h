@@ -18,9 +18,12 @@ using fwk::PtrInterface;
 using std::set;
 using std::to_string;
 
-
 class Conn : public NamedInterface {
 public:
+
+	static Ptr<Conn> instanceNew(const string& name) {
+		return new Conn(name);
+	}
 
 	class Path : public PtrInterface {
 	public:
@@ -78,10 +81,6 @@ public:
 		vector< Ptr<Segment> > segments_;
 		Miles length_;
 	};
-
-	static Ptr<Conn> instanceNew(const string& name) {
-		return new Conn(name);
-	}
 
 protected:
 
@@ -145,6 +144,7 @@ private:
 
 		return validPaths;
 	}
+
 };
 
 

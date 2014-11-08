@@ -21,8 +21,6 @@ Ptr<Instance> segmentNew(
 int main(const int argc, const char* const argv[]) {
     const auto manager = TravelInstanceManager::instanceManager();
 
-    const auto stats = manager->instanceNew("myStats", "Stats");
-
     const auto plane = manager->instanceNew("plane", "Airplane");
     plane->attributeIs("speed", "500");
     plane->attributeIs("capacity", "200");
@@ -64,11 +62,33 @@ int main(const int argc, const char* const argv[]) {
     cout << "segment4 of sfo: ";
     cout << manager->instance("sfo")->attribute("segment4") << endl; 
 
+    const auto stats = manager->instanceNew("myStats", "Stats");
     cout << "Stats:" << endl;
     cout << "# Residences: " << stats->attribute("Residence") << endl;
     cout << "# Airports: " << stats->attribute("Airport") << endl;
     cout << "# Road segments: " << stats->attribute("Road") << endl;
     cout << "# Flight segments: " << stats->attribute("Flight") << endl;
+
+    const auto stats1 = manager->instanceNew("myStats1", "Stats");
+    cout << "Stats:" << endl;
+    cout << "# Residences: " << stats1->attribute("Residence") << endl;
+    cout << "# Airports: " << stats1->attribute("Airport") << endl;
+    cout << "# Road segments: " << stats1->attribute("Road") << endl;
+    cout << "# Flight segments: " << stats1->attribute("Flight") << endl;
+
+    const auto stats2 = manager->instance("myStats");
+    cout << "Stats:" << endl;
+    cout << "# Residences: " << stats2->attribute("Residence") << endl;
+    cout << "# Airports: " << stats2->attribute("Airport") << endl;
+    cout << "# Road segments: " << stats2->attribute("Road") << endl;
+    cout << "# Flight segments: " << stats2->attribute("Flight") << endl;
+
+    const auto stats3 = manager->instance("myStats1");
+    cout << "Stats:" << endl;
+    cout << "# Residences: " << stats3->attribute("Residence") << endl;
+    cout << "# Airports: " << stats3->attribute("Airport") << endl;
+    cout << "# Road segments: " << stats3->attribute("Road") << endl;
+    cout << "# Flight segments: " << stats3->attribute("Flight") << endl;
 
     const auto conn = manager->instanceNew("myConn", "Conn");
 
