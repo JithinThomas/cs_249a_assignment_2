@@ -26,7 +26,7 @@ const string getEntityName(Ptr<NamedInterface> entity) {
     return "";
 } 
 
-double strToNonNegativeDouble(const string& str) {
+double tryConvertStrToNonNegDouble(const string& str) {
     stringstream ss(str);
     double value;
     if (ss >> value) {
@@ -170,7 +170,7 @@ protected:
 
                         logError(WARNING, "Specified location '" + value + "' does not exist. Skipping command.");
                     } else if (name == "length") {
-                        auto length = Miles(strToNonNegativeDouble(value));
+                        auto length = Miles(tryConvertStrToNonNegDouble(value));
                         segment_->lengthIs(length);
                     } else {
                         logError(WARNING, "Invalid attribute ('" + name + "') specified for Segment. Skipping command.");
@@ -238,9 +238,9 @@ protected:
                         //vehicle_->capacityIs(strToInt(value));
                         vehicle_->capacityIs(std::stoi(value));
                     } else if (name == "cost") {
-                        vehicle_->costIs(strToNonNegativeDouble(value));
+                        vehicle_->costIs(tryConvertStrToNonNegDouble(value));
                     } else if (name == "speed") {
-                        vehicle_->speedIs(strToNonNegativeDouble(value));
+                        vehicle_->speedIs(tryConvertStrToNonNegDouble(value));
                     } else {
                         logError(WARNING, "Invalid attribute ('" + name + "') specified for Vehicle. Skipping command.");
                     } 

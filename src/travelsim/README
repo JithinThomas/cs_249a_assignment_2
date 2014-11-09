@@ -2,8 +2,18 @@ user: jithinpt
 
 This document contains the following information about the code:
 
+* Building and running
 * Source code structure
 * Major design decisions for the third layer API
+* Testing
+* Collaboration
+
+==========================================
+Building and running
+==========================================
+
+cd <ROOT>/src/travelsim
+make # This builds the API code and the 3 clients used to test the API
 
 ==========================================
 Source code structure
@@ -76,3 +86,21 @@ Major design decisions
 * The second (ie, string-based) layer supports the creation of multiple Stats and Conn instances. However, they all point to a single Stats/Conn instance in the third layer.
 
 * Although the string-based interface queries a Location only for its source segments, the third layer API Location instance exposes two collection attributes: sourceSegments and destinationSegments. This is partly for the sake of completeness and partly for efficiency. When a Location is deleted, these lists make it easy to figure out which Segments have the deleted Location as their source/destination and update them accordingly.
+
+==========================================
+Testing
+==========================================
+
+* The third layer API was almost completely tested using unit tests written using the gtest framework.
+  The tests can be found at tests/travelsim/TravelTests.cxx
+
+* The unittests also test important portions of the second layer string based API
+
+* In addition to that, 3 client scripts (client1.cxx, client2.cxx and client3.cxx) were also used to test the second layer API. These scripts can be found in src/travelsim
+
+==========================================
+Collaboration
+==========================================
+
+* Collaborated with Jayesh Y and Fuad Al-Amin regarding some design decisions and testing the code.
+* Shared test scripts and compared the outputs to ensure they match.

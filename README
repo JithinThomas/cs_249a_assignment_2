@@ -1,0 +1,106 @@
+user: jithinpt
+
+This document contains the following information about the code:
+
+* Building and running
+* Source code structure
+* Major design decisions for the third layer API
+* Testing
+* Collaboration
+
+==========================================
+Building and running
+==========================================
+
+cd <ROOT>/src/travelsim
+make # This builds the API code and the 3 clients used to test the API
+
+==========================================
+Source code structure
+==========================================
+
+TravelNetworkManager.h
+=========================
+
+* Defines the TravelNetworkManager and TravelNetworkTracker classes
+* The TravelNetworkManager is the class that manages an entire transport network. Users are expected to add/delete an entity to/from the network through this class. Note that the TravelNetworkManager class does not expose methods like residenceIs, flightIs, carIs, etc. because the client is expected to instantiate new entities via this class.
+* The travel network manager exposes singleton stats() and conn() instances. It does not support the creation of additional stats and conn entities
+* The underlying type of the stats() instance is TravelNetworkTracker - which is an implementation of the Notifiee class of TravelNetworkManager
+
+Location.h
+=========================
+
+* Defines the Location, Residence and Airport entities
+
+Segment.h
+=========================
+
+* Defines the Segment and Road entities
+
+SegmentImpl.h
+=========================
+
+* Defines the implementation of Segment::sourceIs() and Segment::destinationIs()
+* This file was needed to overcome the circular dependency issues that arise between Location.h and Segment.h
+
+Flight.h
+=========================
+
+* Defines the Flight entity
+
+ValueTypes.h
+=========================
+
+* Defines the various specialized value types:
+	* DollarsPerMile - eg: type of 'cost' attribute of a Vehicle
+	* Miles
+	* MilesPerHour
+	* PassengerCount - eg: type of 'capacity' attribute of a Vehicle
+
+Vehicle.h
+=========================
+
+* Defines the Vehicle, Airplane and Car entities
+
+Conn.h
+=========================
+
+* Defines the Conn entity
+
+CommonLib.h
+=========================
+
+* Defines a set of global functions - eg: logError()
+
+
+==========================================
+Major design decisions
+==========================================
+
+* The TravelNetworkManager does not support the addition of externally created entities. The client is allowed to instantiate new entities only via the methods exposed by the travel manager.
+
+* TravelNetworkManager exposes a singleton Stats() and Conn() instance. It does not support the creation of additional Stats and Conn instances.
+
+* The API does not check against scenarios where the client tries to connect a Segment belonging to one travel network and a Location belonging to another. The client is expected to be careful about this aspect in order to corrupt the state of the network.
+
+* The second (ie, string-based) layer supports the creation of multiple Stats and Conn instances. However, they all point to a single Stats/Conn instance in the third layer.
+
+* Although the string-based interface queries a Location only for its source segments, the third layer API Location instance exposes two collection attributes: sourceSegments and destinationSegments. This is partly for the sake of completeness and partly for efficiency. When a Location is deleted, these lists make it easy to figure out which Segments have the deleted Location as their source/destination and update them accordingly.
+
+==========================================
+Testing
+==========================================
+
+* The third layer API was almost completely tested using unit tests written using the gtest framework.
+  The tests can be found at tests/travelsim/TravelTests.cxx
+
+* The unittests also test important portions of the second layer string based API
+
+* In addition to that, 3 client scripts (client1.cxx, client2.cxx and client3.cxx) were also used to test the second layer API. These scripts can be found in src/travelsim
+
+==========================================
+Collaboration
+==========================================
+
+* Collaborated with Jayesh Y and Fuad Al-Amin regarding some design decisions and testing the code.
+* Shared test scripts and compared the outputs to ensure they match.
